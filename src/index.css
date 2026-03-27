@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* animação de shake para erro */
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 420ms cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* suavização global de transições */
+:root {
+  --card-bg: #ffffff;
+  --accent: #b91c1c; /* vermelho - ajustar se quiser */
+}
+
+/* forçando toque mais suave para totem */
+button, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
