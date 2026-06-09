@@ -42,7 +42,7 @@ const Summary: React.FC<SummaryProps> = ({ patient, appointment, paymentMethod, 
       <footer className="flex items-center justify-between mt-6">
         <button onClick={onBack} className="text-gray-700 font-semibold text-lg px-4 py-3 rounded-lg hover:bg-gray-50 transition">← Voltar</button>
         <button onClick={onFinalize} className="bg-[#b91c1c] text-white font-bold px-8 py-4 rounded-lg shadow-lg hover:bg-[#8b1212] transition text-lg">
-          Finalizar
+          Pagar
         </button>
       </footer>
     </div>

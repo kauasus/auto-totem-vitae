@@ -8,7 +8,7 @@ import type { PatientData } from '../types';
  */
 const mockPatient: PatientData = {
   nomeCompleto: 'Isabela Veloso Duarte',
-  cpf: '123.456.789-00',
+  cpf: '111.111.111-11',
   rg: '12345678',
   dataNascimento: '01/01/1990',
   estadoCivil: 'Solteira',
@@ -22,7 +22,7 @@ export async function searchPatientByCpf(cpfOnlyNumbers: string): Promise<{ foun
   // simula latência
   await new Promise((r) => setTimeout(r, 900));
 
-  if (cpfOnlyNumbers === '12345678900') {
+  if (cpfOnlyNumbers === '11111111111') {
     return { found: true, patient: mockPatient };
   }
 
