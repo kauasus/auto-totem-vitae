@@ -1,42 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from 'react';
-import { User, Loader2 } from 'lucide-react';
-import NumericKeyboard from './NumericKeyboard';
+import React, { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import NumericKeyboard from "./NumericKeyboard";
 
 interface CpfInputProps {
   cpf: string; // só números
   setCpf: (cpfOnlyNumbers: string) => void;
-  onSubmit: (cpfOnlyNumbers: string) => Promise<{ found: boolean; patient?: any; message?: string }>;
+  onSubmit: (
+    cpfOnlyNumbers: string,
+  ) => Promise<{ found: boolean; patient?: any; message?: string }>;
 }
 
 const formatCPF = (v: string) => {
-  const d = v.replace(/\D/g, '').slice(0, 11);
+  const d = v.replace(/\D/g, "").slice(0, 11);
   if (d.length <= 3) return d;
   if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
   if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
   return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
 };
 
-const onlyNumbers = (s: string) => s.replace(/\D/g, '');
+const onlyNumbers = (s: string) => s.replace(/\D/g, "");
 
 const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
   // local armazena SOMENTE os dígitos (sem formatação)
-  const [local, setLocal] = useState<string>(() => cpf || '');
+  const [local, setLocal] = useState<string>(() => cpf || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLocal(cpf || '');
+    setLocal(cpf || "");
   }, [cpf]);
 
   const triggerError = (msg?: string) => {
-    setError(msg ?? 'CPF inválido');
+    setError(msg ?? "CPF inválido");
   };
 
   const handleSubmit = async () => {
     const nums = onlyNumbers(local);
     if (nums.length !== 11) {
-      triggerError('Digite um CPF com 11 dígitos.');
+      triggerError("Digite um CPF com 11 dígitos.");
       return;
     }
 
@@ -46,12 +48,12 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
     try {
       const res = await onSubmit(nums);
       if (!res.found) {
-        triggerError(res.message ?? 'Paciente não encontrado');
+        triggerError(res.message ?? "Paciente não encontrado");
         setIsSubmitting(false);
       }
       // se encontrado, o App tratará a navegação
     } catch {
-      triggerError('Erro de rede. Tente novamente.');
+      triggerError("Erro de rede. Tente novamente.");
       setIsSubmitting(false);
     }
   };
@@ -73,14 +75,14 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
     // current numeric string
     const current = onlyNumbers(local);
 
-    if (key === 'backspace') {
+    if (key === "backspace") {
       const newNums = current.slice(0, -1);
       setLocal(newNums);
       setCpf(newNums);
       setError(null);
-    } else if (key === 'clear') {
-      setLocal('');
-      setCpf('');
+    } else if (key === "clear") {
+      setLocal("");
+      setCpf("");
       setError(null);
     } else if (/\d/.test(key) && current.length < 11) {
       const newNums = current + key;
@@ -97,17 +99,15 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           e.preventDefault();
           handleSubmit();
         }}
-        className={`bg-white rounded-2xl shadow-md p-6 animate-fade-slide-up ${error ? 'animate-shake' : ''}`}
+        className={`bg-white rounded-2xl shadow-md p-6 animate-fade-slide-up ${error ? "animate-shake" : ""}`}
         aria-labelledby="cpf-title"
       >
-        <h2 id="cpf-title" className="text-2xl font-extrabold text-[#8b0f0f] mb-4">
+        <h2
+          id="cpf-title"
+          className="text-2xl font-extrabold text-[#8b0f0f] mb-4 uppercase"
+        >
           Digite seu CPF
         </h2>
-
-        <label className="flex items-center gap-3 text-gray-600 font-medium mb-2">
-          <User className="w-5 h-5 text-[#b91c1c]" />
-          <span>CPF</span>
-        </label>
 
         <input
           type="text"
@@ -120,7 +120,9 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           disabled={isSubmitting}
         />
 
-        <p className="text-xs text-gray-400 mb-4">Apenas números. Ex.: 123.456.789-00</p>
+        <p className="text-xs text-gray-400 mb-4">
+          Apenas números. Ex.: 123.456.789-00
+        </p>
 
         {error && <div className="text-sm text-red-600 mb-3">{error}</div>}
 
@@ -128,8 +130,8 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           <button
             type="button"
             onClick={() => {
-              setLocal('');
-              setCpf('');
+              setLocal("");
+              setCpf("");
               setError(null);
             }}
             className="flex-1 py-3 rounded-lg bg-gray-100 text-gray-700 text-lg hover:bg-gray-200 transition"

@@ -1,11 +1,14 @@
-import React from 'react';
+import React from "react";
 
 interface HeaderProps {
   title?: string;
   subtitle?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title = 'RECEPÇÃO DE PACIENTE', subtitle }) => {
+const Header: React.FC<HeaderProps> = ({
+  title = "RECEPÇÃO DE PACIENTE",
+  subtitle,
+}) => {
   return (
     <header className="rounded-t-lg bg-gradient-to-r from-[#b42222] to-[#8b1212] text-white p-4">
       <div className="max-w-5xl mx-auto">
