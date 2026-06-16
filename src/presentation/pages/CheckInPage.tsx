@@ -15,6 +15,7 @@ import VitaeLogo from "../../components/VitaeLogo";
 import { isValidEmail, normalizeEmail } from "../../validation";
 import AddressForm from "../../components/AddressForm";
 import { makeSearchPatientByCpf } from "../../main/factories/make-search-patient-by-cpf";
+import { makePrintAppointment } from "../../main/factories/make-print-appointment";
 
 type Step =
   | "cpf"
@@ -26,6 +27,7 @@ type Step =
   | "success";
 
 const searchPatientByCpf = makeSearchPatientByCpf();
+const printAppointment = makePrintAppointment();
 
 const CheckInPage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -62,7 +64,16 @@ const CheckInPage: React.FC = () => {
     return res;
   };
 
-  const handleFinalize = () => {
+  const handleFinalize = async () => {
+    if (!patient || !appointment) {
+      throw new Error("Dados insuficientes para imprimir.");
+    }
+
+    await printAppointment.execute({
+      patient,
+      appointment,
+    });
+
     setStep("success");
     setTimeout(() => {
       handleRestart();

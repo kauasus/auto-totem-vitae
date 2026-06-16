@@ -6,7 +6,7 @@ interface SummaryProps {
   appointment: Appointment;
   paymentMethod: "PIX" | "CREDITO" | "DEBITO";
   onBack: () => void;
-  onFinalize: () => void;
+  onFinalize: () => Promise<void>;
 }
 
 const priceLabel = (v?: number) =>
@@ -19,6 +19,25 @@ const Summary: React.FC<SummaryProps> = ({
   onBack,
   onFinalize,
 }) => {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleFinalize = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await onFinalize();
+    } catch (finalizeError) {
+      setError(
+        finalizeError instanceof Error
+          ? finalizeError.message
+          : "Não foi possível imprimir agora.",
+      );
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="animate-fade-slide-up">
       <div className="space-y-4">
@@ -74,6 +93,12 @@ const Summary: React.FC<SummaryProps> = ({
           <div className="text-xs text-gray-500">Forma de pagamento</div>
           <div className="font-semibold">{paymentMethod}</div>
         </div>
+
+        {error && (
+          <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+            {error}
+          </div>
+        )}
       </div>
 
       <footer className="flex items-center justify-between mt-6">
@@ -84,10 +109,18 @@ const Summary: React.FC<SummaryProps> = ({
           ← Voltar
         </button>
         <button
-          onClick={onFinalize}
-          className="bg-[#b91c1c] text-white font-bold px-8 py-4 rounded-lg shadow-lg hover:bg-[#8b1212] transition text-lg"
+          onClick={() => {
+            void handleFinalize();
+          }}
+          disabled={isSubmitting}
+          className={[
+            "bg-[#b91c1c] text-white font-bold px-8 py-4 rounded-lg shadow-lg transition text-lg",
+            isSubmitting
+              ? "cursor-wait opacity-80"
+              : "hover:bg-[#8b1212]",
+          ].join(" ")}
         >
-          Finalizar
+          {isSubmitting ? "Imprimindo..." : "Finalizar"}
         </button>
       </footer>
     </div>

@@ -8,10 +8,11 @@ import {
   formatApiDate,
   formatApiTime,
   formatCpf,
+  formatPhone,
   normalizeCpf,
 } from "../../validation";
 
-const asString = (value: string | number | null | undefined) =>
+const asString = (value: string | number | boolean | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
 
 const pickDisplayCpf = (cpfInput: string) => {
@@ -19,39 +20,81 @@ const pickDisplayCpf = (cpfInput: string) => {
   return cpf ? formatCpf(cpf) : cpfInput;
 };
 
+const pickCpf = (response: AppointmentSearchResponseDto) =>
+  response.Paciente?.codCpf ?? "";
+
+const pickPatientName = (response: AppointmentSearchResponseDto) =>
+  response.Paciente?.nomPaciente ||
+  response.nomSolicitante ||
+  response.nomUsuario ||
+  "";
+
+const pickBirthDate = (response: AppointmentSearchResponseDto) =>
+  response.Paciente?.datNascimento || response.datNasc || "";
+
+const pickAddress = (response: AppointmentSearchResponseDto) => {
+  const patient = response.Paciente;
+
+  return {
+    cep: asString(patient?.codEndrcmntPstl),
+    logradouro: [
+      patient?.abrLogradouro,
+      patient?.nomLogradouro,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+    numero: asString(patient?.numPredio),
+    complemento: asString(patient?.dscCmplmntEndrc),
+    bairro: asString(patient?.nomBairro),
+    cidade: asString(patient?.codMunicipio),
+    municipio: asString(patient?.Municipio.dscMunicipio),
+    uf: asString(patient?.sigUnidadeFederacao),
+  };
+};
+
+const pickAppointmentValue = (response: AppointmentSearchResponseDto) => {
+  const tableValue = response.Procedimento?.procedimentoTabela?.[0]?.valProcedimento;
+
+  return typeof tableValue === "number" ? tableValue : undefined;
+};
+
 const mapPatient = (
   response: AppointmentSearchResponseDto,
   cpfInput: string,
 ): PatientData => ({
-  nomeCompleto: response.nom_solicitante || response.Nom_Usuario || "",
-  cpf: pickDisplayCpf(cpfInput),
-  telefone: asString(response.num_telefone),
-  telefone2: asString(response.Num_Telefone2),
-  email: asString(response.e_mail),
-  dataNascimento: formatApiDate(
-    asString(response.Dat_Nasc || response.dat_nascimento),
+  nomeCompleto: pickPatientName(response),
+  cpf: pickDisplayCpf(pickCpf(response) || cpfInput),
+  telefone: formatPhone(
+    response.Paciente?.numTelefone ?? response.numTelefone ?? "",
   ),
-  address: {
-    cep: asString(response.Cod_Endrcmnt_Pstl),
-    logradouro: asString(response.Nom_Logradouro),
-    numero: asString(response.Num_Predio),
-    complemento: asString(response.Dsc_Cmplmnt_Endrc),
-    bairro: asString(response.Nom_Bairro),
-    cidade: asString(response.Cod_Municipio),
-    uf: asString(response.Sig_Unidade_Federacao),
-  },
+  telefone2: formatPhone(
+    response.Paciente?.numTelefone2 ?? response.numTelefone2 ?? "",
+  ),
+  email: response.Paciente?.email ?? "",
+  dataNascimento: formatApiDate(pickBirthDate(response)),
+  address: pickAddress(response),
 });
 
 const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => ({
-  medico: response.Nom_medico || "",
-  especialidade: response.dsc_especialidade || "",
-  procedimento: response.Nom_Procedimento || "",
-  horario: formatApiTime(response.Hor_Inicio || ""),
-  consultorio: asString(response.Num_Sala || response.Cod_Local),
-  sala: asString(response.Num_Sala),
-  local: response.nom_local || "",
-  dataAgenda: formatApiDate(response.Dat_Agenda || ""),
-  dataMarcacao: formatApiDate(response.Dat_Marcacao || ""),
+  codAtendimento: response.codAtendimento,
+  medico:
+    response.Medico?.nomMedico ||
+    response.nomMedico ||
+    response.nomSolicitante ||
+    "",
+  especialidade: response.dscEspecialidade || "",
+  procedimento:
+    response.Procedimento?.nomProcedimento ||
+    response.nomProcedimento ||
+    "",
+  horario: formatApiTime(response.horInicio || ""),
+  consultorio: asString(response.numSala || response.codLocal),
+  sala: asString(response.numSala),
+  local: response.nomLocal || "",
+  dataAgenda: formatApiDate(response.datAgenda || ""),
+  dataMarcacao: formatApiDate(response.datMarcacao || ""),
+  valor: pickAppointmentValue(response),
 });
 
 export const mapAppointmentSearchResponse = (

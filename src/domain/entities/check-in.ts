@@ -22,6 +22,7 @@ export type PatientData = {
 };
 
 export type Appointment = {
+  codAtendimento?: number;
   medico: string;
   especialidade: string;
   procedimento: string;

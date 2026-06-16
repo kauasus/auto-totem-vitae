@@ -1,11 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-export interface HttpClient {
+export interface PrinterHttpClient {
   post<TResponse>(url: string, body: unknown): Promise<TResponse>;
 }
-
-type FetchHttpClientOptions = {
-  getAuthToken?: () => string;
-};
 
 const readResponseError = async (response: Response) => {
   const contentType = response.headers.get("content-type") ?? "";
@@ -33,17 +28,13 @@ const readResponseError = async (response: Response) => {
   }
 };
 
-export const createFetchHttpClient = (
-  _options: FetchHttpClientOptions = {},
-): HttpClient => ({
+export const createPrinterFetchHttpClient = (): PrinterHttpClient => ({
   async post<TResponse>(url: string, body: unknown): Promise<TResponse> {
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "x-access-token":
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3OTMiLCJpYXQiOjE3ODE2MzM2MDV9.E5PN9xBu3kKIiI92zP9sLdiWfwQrfEZuvuV3yNz4G7Q",
       },
       body: JSON.stringify(body),
     });

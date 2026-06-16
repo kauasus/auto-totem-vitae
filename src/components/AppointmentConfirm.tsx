@@ -12,11 +12,11 @@ const Field: React.FC<{ label: string; value: string }> = ({
   label,
   value,
 }) => (
-  <div className="rounded-2xl border border-gray-100 bg-white px-4 py-4 shadow-sm">
+  <div className="rounded-2xl border border-gray-100 bg-white px-4 py-4 shadow-sm min-h-[104px] flex flex-col justify-between">
     <div className="text-[11px] uppercase font-black tracking-[0.25em] text-gray-400">
       {label}
     </div>
-    <div className="mt-2 text-lg font-semibold text-gray-800 leading-snug">
+    <div className="mt-3 text-[15px] md:text-lg font-semibold text-gray-900 leading-tight break-words">
       {value}
     </div>
   </div>
@@ -61,19 +61,31 @@ const AppointmentConfirm: React.FC<AppointmentConfirmProps> = ({
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 ">
-            <Field label="Médico" value={appointment.medico} />
-            <Field label="Especialidade" value={appointment.especialidade} />
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+            <div className="xl:col-span-3">
+              <Field label="Médico" value={appointment.medico} />
+            </div>
+            <div className="xl:col-span-3">
+              <Field label="Especialidade" value={appointment.especialidade} />
+            </div>
 
-            <Field label="Horário" value={appointment.horario} />
-            <Field
-              label="Consultório"
-              value={`Consultório ${appointment.consultorio}`}
-            />
-            <Field label="Data da agenda" value={appointment.dataAgenda ?? "-"} />
+            <div className="xl:col-span-2">
+              <Field label="Horário" value={appointment.horario} />
+            </div>
+            <div className="xl:col-span-2">
+              <Field
+                label="Consultório"
+                value={`Consultório ${appointment.consultorio}`}
+              />
+            </div>
+            <div className="xl:col-span-2">
+              <Field
+                label="Data da agenda"
+                value={appointment.dataAgenda ?? "-"}
+              />
+            </div>
           </div>
 
-        
         </div>
       </div>
 

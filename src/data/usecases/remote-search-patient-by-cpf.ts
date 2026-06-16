@@ -5,6 +5,15 @@ import { mapAppointmentSearchResponse } from "../mappers/appointment-search-mapp
 import { isValidCpf, normalizeCpf } from "../../validation";
 import type { HttpClient } from "../../infra/http/fetch-http-client";
 
+const ENABLED_CONVENIO_CODE = 31;
+const CONVENIO_BLOCK_MESSAGE =
+  "Este convênio ainda não está habilitado para auto-atendimento. Estamos trabalhando para ampliar nossa rede de convênios aceitos.";
+
+const getConvenioCode = (response: AppointmentSearchResponseDto) =>
+  response.codConvenio ??
+  response.Convenio?.codConvenio ??
+  response.Paciente?.codConvenio;
+
 export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
   private readonly httpClient: HttpClient;
   private readonly endpoint: string;
@@ -41,6 +50,14 @@ export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
         return {
           found: false,
           message: "A API não retornou dados para esse CPF.",
+        };
+      }
+
+      const convenioCode = getConvenioCode(response);
+      if (convenioCode !== ENABLED_CONVENIO_CODE) {
+        return {
+          found: false,
+          message: CONVENIO_BLOCK_MESSAGE,
         };
       }
 
