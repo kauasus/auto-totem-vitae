@@ -58,6 +58,7 @@ const ConfirmData: React.FC<ConfirmDataProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Telefone / Celular" value={patient.telefone} />
+          <Field label="Telefone 2" value={patient.telefone2} />
 
           <EditableEmailField
             value={patient.email ?? ""}

@@ -8,7 +8,8 @@ interface PaymentProps {
   onSelect: (method: "PIX" | "CREDITO" | "DEBITO") => void;
 }
 
-const priceLabel = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
+const priceLabel = (v?: number) =>
+  typeof v === "number" ? `R$ ${v.toFixed(2).replace(".", ",")}` : "Não informado";
 
 const Payment: React.FC<PaymentProps> = ({ appointment, onBack, onSelect }) => {
   return (
@@ -51,7 +52,7 @@ const Payment: React.FC<PaymentProps> = ({ appointment, onBack, onSelect }) => {
                 Consultório
               </div>
               <div className="font-semibold">
-                Consultório {appointment.consultorio}
+                {appointment.local || `Consultório ${appointment.consultorio}`}
               </div>
             </div>
           </div>

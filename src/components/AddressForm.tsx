@@ -337,6 +337,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
       </footer>
 
       <FieldKeyboardModal
+        key={`${activeField ?? 'closed'}-${activeValue}`}
         open={activeField !== null}
         title={activeConfig?.label ?? ''}
         subtitle={

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Keyboard, X } from 'lucide-react';
 import NumericKeyboard from './NumericKeyboard';
@@ -33,10 +33,6 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
   onConfirm,
 }) => {
   const [draft, setDraft] = useState(value);
-
-  useEffect(() => {
-    if (open) setDraft(value);
-  }, [open, value]);
 
   const previewValue = previewFormatter ? previewFormatter(draft) : draft;
 

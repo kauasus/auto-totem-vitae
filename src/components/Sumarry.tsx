@@ -9,7 +9,8 @@ interface SummaryProps {
   onFinalize: () => void;
 }
 
-const priceLabel = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
+const priceLabel = (v?: number) =>
+  typeof v === "number" ? `R$ ${v.toFixed(2).replace(".", ",")}` : "Não informado";
 
 const Summary: React.FC<SummaryProps> = ({
   patient,
@@ -57,8 +58,8 @@ const Summary: React.FC<SummaryProps> = ({
               {appointment.especialidade}
             </div>
             <div className="mt-2 text-sm text-gray-500">
-              {appointment.medico} • {appointment.horario} • Consultório{" "}
-              {appointment.consultorio}
+              {appointment.medico} • {appointment.horario} •{" "}
+              {appointment.local || `Consultório ${appointment.consultorio}`}
             </div>
           </div>
           <div className="text-right">

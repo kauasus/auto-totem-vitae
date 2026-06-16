@@ -1,5 +1,5 @@
 import React from "react";
-import { CalendarClock, Clock3, MapPin, Stethoscope } from "lucide-react";
+import { CalendarClock, Stethoscope } from "lucide-react";
 import type { Appointment } from "../types";
 
 interface AppointmentConfirmProps {
@@ -61,7 +61,7 @@ const AppointmentConfirm: React.FC<AppointmentConfirmProps> = ({
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 ">
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 ">
             <Field label="Médico" value={appointment.medico} />
             <Field label="Especialidade" value={appointment.especialidade} />
 
@@ -70,37 +70,10 @@ const AppointmentConfirm: React.FC<AppointmentConfirmProps> = ({
               label="Consultório"
               value={`Consultório ${appointment.consultorio}`}
             />
+            <Field label="Data da agenda" value={appointment.dataAgenda ?? "-"} />
           </div>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-gray-100 bg-white px-4 py-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fef2f2] text-[#a31515]">
-                <Clock3 className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="text-xs uppercase font-bold tracking-widest text-gray-400">
-                  Horário
-                </div>
-                <div className="font-semibold text-gray-800">
-                  {appointment.horario}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-100 bg-white px-4 py-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fef2f2] text-[#a31515]">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="text-xs uppercase font-bold tracking-widest text-gray-400">
-                  Local
-                </div>
-                <div className="font-semibold text-gray-800">
-                  Consultório {appointment.consultorio}
-                </div>
-              </div>
-            </div>
-          </div>
+        
         </div>
       </div>
 
