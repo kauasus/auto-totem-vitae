@@ -47,7 +47,7 @@ const pickAddress = (response: AppointmentSearchResponseDto) => {
     numero: asString(patient?.numPredio),
     complemento: asString(patient?.dscCmplmntEndrc),
     bairro: asString(patient?.nomBairro),
-    cidade: asString(patient?.codMunicipio),
+    cidade: asString(patient?.Municipio.dscMunicipio),
     municipio: asString(patient?.Municipio.dscMunicipio),
     uf: asString(patient?.sigUnidadeFederacao),
   };

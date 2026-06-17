@@ -58,6 +58,17 @@ const EditableEmailField: React.FC<EditableEmailFieldProps> = ({
     });
   };
 
+  const handleSuggestionPress = (domain: string) => {
+    setError(null);
+
+    setDraft((current) => {
+      const normalized = normalizeEmail(current);
+      const [localPart] = normalized.split("@");
+      if (!localPart) return current;
+      return `${localPart}@${domain}`;
+    });
+  };
+
   const currentValue = value.trim();
   const isCurrentValid = isValidEmail(currentValue);
 
@@ -188,7 +199,11 @@ const EditableEmailField: React.FC<EditableEmailFieldProps> = ({
                   )}
                 </div>
 
-                <EmailKeyboard onKeyPress={handleKeyPress} />
+                <EmailKeyboard
+                  value={draft}
+                  onKeyPress={handleKeyPress}
+                  onSuggestionPress={handleSuggestionPress}
+                />
 
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <button
