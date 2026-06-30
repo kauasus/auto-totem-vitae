@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CpfInput from "../../components/CpfInput";
-import AppointmentConfirm from "../../components/AppointmentConfirm";
-import ConfirmData from "../../components/ConfirmData";
 import Payment from "../../components/Payment";
-import Summary from "../../components/Sumarry";
 import Success from "../../components/Sucess";
 import type {
   Appointment,
@@ -12,19 +9,10 @@ import type {
   SearchPatientResult,
 } from "../../types";
 import VitaeLogo from "../../components/VitaeLogo";
-import { isValidEmail, normalizeEmail } from "../../validation";
-import AddressForm from "../../components/AddressForm";
 import { makeSearchPatientByCpf } from "../../main/factories/make-search-patient-by-cpf";
 import { makePrintAppointment } from "../../main/factories/make-print-appointment";
 
-type Step =
-  | "cpf"
-  | "appointment"
-  | "confirm"
-  | "address"
-  | "payment"
-  | "summary"
-  | "success";
+type Step = "cpf" | "payment" | "success";
 
 const searchPatientByCpf = makeSearchPatientByCpf();
 const printAppointment = makePrintAppointment();
@@ -36,11 +24,6 @@ const CheckInPage: React.FC = () => {
   const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState("");
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<
-    "PIX" | "CREDITO" | "DEBITO" | null
-  >(null);
-
-  const canProceedConfirm = isValidEmail(patient?.email ?? "");
 
   const handleStart = () => setShowSplash(false);
 
@@ -48,25 +31,30 @@ const CheckInPage: React.FC = () => {
     setPatient(null);
     setAppointment(null);
     setCpfOnlyNumbers("");
-    setPaymentMethod(null);
     setStep("cpf");
   };
 
-  const handleCpfSearch = async (cpfNums: string): Promise<SearchPatientResult> => {
+  const handleCpfSearch = async (
+    cpfNums: string,
+  ): Promise<SearchPatientResult> => {
     const res = await searchPatientByCpf.execute(cpfNums);
 
     if (res.found && res.patient) {
       setPatient(res.patient);
       setAppointment(res.appointment ?? null);
-      setStep("appointment");
+      setStep("payment");
     }
 
     return res;
   };
 
-  const handleFinalize = async () => {
+  const handleFinalize = async (method: "PIX" | "CREDITO" | "DEBITO") => {
     if (!patient || !appointment) {
       throw new Error("Dados insuficientes para imprimir.");
+    }
+
+    if (method !== "PIX" && method !== "CREDITO" && method !== "DEBITO") {
+      throw new Error("Forma de pagamento inválida.");
     }
 
     await printAppointment.execute({
@@ -83,11 +71,7 @@ const CheckInPage: React.FC = () => {
 
   const subtitleMap: Record<Step, string> = {
     cpf: "Identifique-se para iniciar o atendimento",
-    appointment: "Confirme seu agendamento",
-    confirm: "Confirme seus dados pessoais",
-    address: "Confirme seu endereço",
-    payment: "Confirme seu procedimento e o preço",
-    summary: "Revise e confirme suas informações",
+    payment: "Dados do paciente, consulta e pagamento",
     success: "Pagamento confirmado",
   };
 
@@ -168,68 +152,19 @@ const CheckInPage: React.FC = () => {
                       />
                     )}
 
-                    {step === "appointment" && patient && appointment && (
-                      <AppointmentConfirm
+                    {step === "payment" && patient && appointment && (
+                      <Payment
+                        patient={patient}
                         appointment={appointment}
                         onBack={handleRestart}
-                        onNext={() => setStep("confirm")}
-                      />
-                    )}
-
-                    {step === "confirm" && patient && (
-                      <ConfirmData
-                        patient={patient}
-                        canProceed={canProceedConfirm}
-                        onBack={() => setStep("appointment")}
-                        onEmailChange={(email) => {
-                          setPatient((current) =>
-                            current
-                              ? { ...current, email: normalizeEmail(email) }
-                              : current,
-                          );
-                        }}
-                        onNext={() => {
-                          if (canProceedConfirm) setStep("address");
-                        }}
-                      />
-                    )}
-
-                    {step === "address" && patient && appointment && (
-                      <AddressForm
-                        value={patient.address}
-                        onChange={(address) => {
+                        onConfirm={handleFinalize}
+                        onAddressChange={(address) => {
                           setPatient((current) =>
                             current ? { ...current, address } : current,
                           );
                         }}
-                        onBack={() => setStep("confirm")}
-                        onNext={() => setStep("payment")}
                       />
                     )}
-
-                    {step === "payment" && patient && appointment && (
-                      <Payment
-                        appointment={appointment}
-                        onBack={() => setStep("address")}
-                        onSelect={(method) => {
-                          setPaymentMethod(method);
-                          setStep("summary");
-                        }}
-                      />
-                    )}
-
-                    {step === "summary" &&
-                      patient &&
-                      appointment &&
-                      paymentMethod && (
-                        <Summary
-                          patient={patient}
-                          appointment={appointment}
-                          paymentMethod={paymentMethod}
-                          onBack={() => setStep("payment")}
-                          onFinalize={handleFinalize}
-                        />
-                      )}
 
                     {step === "success" && (
                       <Success
