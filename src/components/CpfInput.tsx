@@ -93,18 +93,18 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="w-full">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
         }}
-        className={`bg-white rounded-2xl shadow-md p-6 animate-fade-slide-up ${error ? "animate-shake" : ""}`}
+        className={`bg-white rounded-2xl shadow-md p-6 md:p-8 animate-fade-slide-up ${error ? "animate-shake" : ""}`}
         aria-labelledby="cpf-title"
       >
         <h2
           id="cpf-title"
-          className="text-2xl font-extrabold text-[#8b0f0f] mb-4 uppercase"
+          className="text-3xl md:text-4xl font-extrabold text-[#8b0f0f] mb-5 uppercase"
         >
           Digite seu CPF
         </h2>
@@ -113,18 +113,18 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           type="text"
           value={formatCPF(local)}
           readOnly
-          className="w-full text-lg p-4 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#b91c1c] focus:ring-2 focus:ring-[#fceaea] outline-none transition duration-150 mb-2"
+          className="w-full text-3xl md:text-4xl p-5 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#b91c1c] focus:ring-2 focus:ring-[#fceaea] outline-none transition duration-150 mb-3"
           aria-label="Campo CPF"
           placeholder="000.000.000-00"
           maxLength={14}
           disabled={isSubmitting}
         />
 
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-sm text-gray-400 mb-5">
           Apenas números. Ex.: 123.456.789-00
         </p>
 
-        {error && <div className="text-sm text-red-600 mb-3">{error}</div>}
+        {error && <div className="text-base text-red-600 mb-3">{error}</div>}
 
         <div className="flex gap-3 mb-6">
           <button
@@ -134,7 +134,7 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
               setCpf("");
               setError(null);
             }}
-            className="flex-1 py-3 rounded-lg bg-gray-100 text-gray-700 text-lg hover:bg-gray-200 transition"
+            className="flex-1 py-4 rounded-lg bg-gray-100 text-gray-700 text-xl hover:bg-gray-200 transition"
             disabled={isSubmitting}
           >
             Limpar
@@ -142,13 +142,13 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
 
           <button
             type="submit"
-            className="flex-1 py-3 rounded-lg bg-[#b91c1c] text-white text-lg font-semibold shadow-md hover:bg-[#991414] transition flex items-center justify-center gap-3"
+            className="flex-1 py-4 rounded-lg bg-[#b91c1c] text-white text-xl font-semibold shadow-md hover:bg-[#991414] transition flex items-center justify-center gap-3"
             disabled={isSubmitting}
             aria-label="Buscar Agendamento"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-6 h-6 animate-spin" />
                 <span>Buscando...</span>
               </>
             ) : (
@@ -158,7 +158,7 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
         </div>
 
         {/* Teclado numérico customizado */}
-        <NumericKeyboard onKeyPress={handleKeyPress} />
+        <NumericKeyboard onKeyPress={handleKeyPress} className="max-w-none" />
       </form>
     </div>
   );

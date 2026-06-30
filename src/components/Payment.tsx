@@ -110,13 +110,13 @@ const Payment: React.FC<PaymentProps> = ({
   }
 
   return (
-    <div className="animate-fade-slide-up">
-      <div className="p-6 space-y-6">
-        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-5 space-y-3">
-          <h4 className="text-sm font-black uppercase tracking-widest text-[#a31515]">
+    <div className="animate-fade-slide-up h-full flex flex-col">
+      <div className="p-4 md:p-5 lg:p-6 space-y-4 md:space-y-5 lg:space-y-6 flex-1 min-h-0 overflow-y-auto">
+        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
+          <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
             Dados
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <Field label="Nome" value={patient.nomeCompleto} />
             <Field
               label="Telefone"
@@ -127,28 +127,28 @@ const Payment: React.FC<PaymentProps> = ({
               <div className="text-[11px] uppercase font-bold tracking-widest text-gray-400">
                 Endereço
               </div>
-              <div className="mt-1 text-sm font-semibold text-gray-800 break-words">
+              <div className="mt-1 text-base font-semibold text-gray-800 break-words leading-tight">
                 {addressLabel(patient)}
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddressOpen(true)}
-                className="mt-3 rounded-lg border border-[#a31515] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#a31515] hover:bg-[#fef2f2]"
+                className="mt-3 rounded-lg border border-[#a31515] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#a31515] hover:bg-[#fef2f2]"
               >
                 Editar endereço
               </button>
             </div>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             Nota fiscal: notafiscal@vitaecenter.com.br
           </p>
         </section>
 
-        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-5 space-y-3">
-          <h4 className="text-sm font-black uppercase tracking-widest text-[#a31515]">
+        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
+          <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
             Consulta
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <Field label="Dr." value={appointment.medico} />
             <Field label="Especialidade" value={appointment.especialidade} />
             <Field label="Horário" value={appointment.horario} />
@@ -156,15 +156,15 @@ const Payment: React.FC<PaymentProps> = ({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-5 space-y-3">
-          <h4 className="text-sm font-black uppercase tracking-widest text-[#a31515]">
+        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
+          <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
             Pagamento
           </h4>
           <Field label="Valor" value={priceLabel(appointment.valor)} />
-          <div className="text-sm font-semibold text-gray-700">
+          <div className="text-base font-semibold text-gray-700">
             Caixinha para selecionar e pagar
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             {paymentOptions.map((option) => {
               const selected = method === option.value;
               return (
@@ -173,7 +173,7 @@ const Payment: React.FC<PaymentProps> = ({
                   type="button"
                   onClick={() => setMethod(option.value)}
                   className={[
-                    "rounded-xl border px-4 py-3 text-left transition-all",
+                    "rounded-xl border px-4 py-4 text-left transition-all",
                     selected
                       ? "border-[#a31515] bg-[#fff1f1] shadow-sm"
                       : "border-gray-200 bg-white hover:border-[#d9a5a5]",
@@ -182,17 +182,17 @@ const Payment: React.FC<PaymentProps> = ({
                   <div className="flex items-start gap-3">
                     <span
                       className={[
-                        "mt-1 h-4 w-4 rounded-full border-2",
+                        "mt-1 h-5 w-5 rounded-full border-2",
                         selected
                           ? "border-[#a31515] bg-[#a31515]"
                           : "border-gray-300 bg-white",
                       ].join(" ")}
                     />
                     <div>
-                      <div className="text-sm font-bold text-gray-900">
+                      <div className="text-base font-bold text-gray-900">
                         {option.label}
                       </div>
-                      <div className="text-xs text-gray-600">
+                      <div className="text-sm text-gray-600">
                         {option.description}
                       </div>
                     </div>
@@ -201,7 +201,7 @@ const Payment: React.FC<PaymentProps> = ({
               );
             })}
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-base text-gray-600">
             Em frente do agendamento de pagamento, verificar a
             maquininha/cartão.
           </p>
@@ -213,10 +213,10 @@ const Payment: React.FC<PaymentProps> = ({
         </section>
       </div>
 
-      <footer className="flex items-center justify-between p-6 border-t border-gray-100 bg-white">
+      <footer className="flex items-center justify-between px-4 py-4 md:px-6 md:py-5 border-t border-gray-100 bg-white">
         <button
           onClick={onBack}
-          className="text-gray-700 font-semibold text-lg px-6 py-3 rounded-xl hover:bg-gray-50 transition"
+          className="text-gray-700 font-semibold text-xl px-6 py-3 rounded-xl hover:bg-gray-50 transition"
         >
           ← Voltar
         </button>
@@ -224,7 +224,7 @@ const Payment: React.FC<PaymentProps> = ({
           onClick={() => void handleConfirm()}
           disabled={!method || isSubmitting}
           className={[
-            "px-10 py-3 rounded-xl font-bold text-lg transition-all",
+            "px-10 py-4 rounded-xl font-bold text-xl transition-all",
             !method || isSubmitting
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-[#a31515] text-white shadow-lg hover:bg-[#8b1212] active:scale-95",

@@ -76,7 +76,7 @@ const CheckInPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6 overflow-hidden font-sans">
+    <div className="h-screen w-screen bg-gray-100 flex items-center justify-center p-2 md:p-3 lg:p-4 overflow-hidden font-sans">
       <AnimatePresence mode="wait">
         {showSplash ? (
           <motion.div
@@ -126,16 +126,16 @@ const CheckInPage: React.FC = () => {
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="w-full max-w-5xl mx-auto"
+            className="w-[96vw] max-w-[1080px] h-[96vh]"
           >
-            <div className="rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20">
-              <div className="bg-gradient-to-r from-[#b42222] to-[#8b1212] text-white p-8">
-                <h1 className="font-black uppercase tracking-tighter text-3xl md:text-4xl text-center drop-shadow-md">
+            <div className="rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 h-full flex flex-col">
+              <div className="bg-gradient-to-r from-[#b42222] to-[#8b1212] text-white p-6 md:p-7 lg:p-8">
+                <h1 className="font-black uppercase tracking-tighter text-2xl md:text-3xl lg:text-4xl text-center drop-shadow-md">
                   {subtitleMap[step]}
                 </h1>
               </div>
 
-              <div className="bg-white p-8 min-h-[500px] flex flex-col justify-center">
+              <div className="bg-white p-5 md:p-6 lg:p-8 flex-1 min-h-0 overflow-y-auto">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={step}
