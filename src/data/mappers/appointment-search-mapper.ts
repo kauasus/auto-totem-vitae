@@ -89,7 +89,7 @@ const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => 
     response.nomProcedimento ||
     "",
   horario: formatApiTime(response.horInicio || ""),
-  consultorio: asString(response.numSala || response.codLocal),
+  numSala: response.numSala || 0,
   sala: asString(response.numSala),
   local: response.nomLocal || "",
   dataAgenda: formatApiDate(response.datAgenda || ""),

@@ -49,7 +49,7 @@ export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
       if (!response) {
         return {
           found: false,
-          message: "A API não retornou dados para esse CPF.",
+          message: "CPF não encontrado.",
         };
       }
 

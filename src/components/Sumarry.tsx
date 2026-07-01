@@ -10,7 +10,9 @@ interface SummaryProps {
 }
 
 const priceLabel = (v?: number) =>
-  typeof v === "number" ? `R$ ${v.toFixed(2).replace(".", ",")}` : "Não informado";
+  typeof v === "number"
+    ? `R$ ${v.toFixed(2).replace(".", ",")}`
+    : "Não informado";
 
 const Summary: React.FC<SummaryProps> = ({
   patient,
@@ -78,7 +80,7 @@ const Summary: React.FC<SummaryProps> = ({
             </div>
             <div className="mt-2 text-sm text-gray-500">
               {appointment.medico} • {appointment.horario} •{" "}
-              {appointment.local || `Consultório ${appointment.consultorio}`}
+              {appointment.local || `Consultório ${appointment.numSala}`}
             </div>
           </div>
           <div className="text-right">
@@ -115,9 +117,7 @@ const Summary: React.FC<SummaryProps> = ({
           disabled={isSubmitting}
           className={[
             "bg-[#b91c1c] text-white font-bold px-8 py-4 rounded-lg shadow-lg transition text-lg",
-            isSubmitting
-              ? "cursor-wait opacity-80"
-              : "hover:bg-[#8b1212]",
+            isSubmitting ? "cursor-wait opacity-80" : "hover:bg-[#8b1212]",
           ].join(" ")}
         >
           {isSubmitting ? "Imprimindo..." : "Finalizar"}

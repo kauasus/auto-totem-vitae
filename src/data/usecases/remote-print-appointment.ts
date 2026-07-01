@@ -6,7 +6,7 @@ export type PrintAppointmentRequest = {
   paciente: string;
   medico: string;
   procedimento: string;
-  sala: string;
+  sala: number;
   corLinha: string;
   andar: string;
 };
@@ -49,7 +49,7 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
       paciente: patient.nomeCompleto,
       medico: appointment.medico,
       procedimento: appointment.procedimento,
-      sala: appointment.sala ?? appointment.consultorio,
+      sala: appointment.numSala,
       corLinha: DEFAULT_COR_LINHA,
       andar: DEFAULT_ANDAR,
     };

@@ -17,9 +17,6 @@ const priceLabel = (v?: number) =>
     ? `R$ ${v.toFixed(2).replace(".", ",")}`
     : "Não informado";
 
-const roomLabel = (appointment: Appointment) =>
-  appointment.local || `Consultório ${appointment.consultorio}`;
-
 const addressLabel = (patient: PatientData) => {
   if (!patient.address) return "Endereço não informado";
   return [
@@ -139,9 +136,9 @@ const Payment: React.FC<PaymentProps> = ({
               </button>
             </div>
           </div>
-          <p className="text-sm text-gray-500">
+          {/* <p className="text-sm text-gray-500">
             Nota fiscal: notafiscal@vitaecenter.com.br
-          </p>
+          </p> */}
         </section>
 
         <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
@@ -152,7 +149,10 @@ const Payment: React.FC<PaymentProps> = ({
             <Field label="Dr." value={appointment.medico} />
             <Field label="Especialidade" value={appointment.especialidade} />
             <Field label="Horário" value={appointment.horario} />
-            <Field label="Consultório" value={roomLabel(appointment)} />
+            <Field
+              label="Consultório"
+              value={`Consultório ${appointment.numSala}`}
+            />
           </div>
         </section>
 

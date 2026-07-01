@@ -171,7 +171,7 @@ const CheckInPage: React.FC = () => {
                         patient={patient}
                         consultorio={
                           appointment
-                            ? `Consultório ${appointment.consultorio}`
+                            ? `Consultório ${appointment.numSala}`
                             : "Consultório 3"
                         }
                       />

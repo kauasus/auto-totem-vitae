@@ -75,7 +75,7 @@ const AppointmentConfirm: React.FC<AppointmentConfirmProps> = ({
             <div className="xl:col-span-2">
               <Field
                 label="Consultório"
-                value={`Consultório ${appointment.consultorio}`}
+                value={`Consultório ${appointment.numSala}`}
               />
             </div>
             <div className="xl:col-span-2">
@@ -85,7 +85,6 @@ const AppointmentConfirm: React.FC<AppointmentConfirmProps> = ({
               />
             </div>
           </div>
-
         </div>
       </div>
 

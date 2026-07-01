@@ -27,7 +27,7 @@ export type Appointment = {
   especialidade: string;
   procedimento: string;
   horario: string;
-  consultorio: string;
+  numSala: number;
   valor?: number;
   sala?: string;
   local?: string;
