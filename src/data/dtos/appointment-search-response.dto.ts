@@ -47,6 +47,8 @@ export type MedicoDto = {
 export type ProcedimentoDto = {
   codProcedimento?: number;
   nomProcedimento?: string;
+  indexame?: number | boolean | string;
+  indExame?: number | boolean | string;
   procedimentoTabela?: Array<{
     codEmpresa?: number;
     valProcedimento?: number;
@@ -79,6 +81,8 @@ export type AppointmentSearchResponseDto = {
   usuarioMarcacao?: string;
   nomUsuario?: string;
   usuarioBloqueio?: string;
+  codTipoGuia?: number;
+  dscEspecie?: string;
   indConfirmacao?: boolean;
   codSituacaoConfirmacao?: number;
   nomMedico?: string;
@@ -89,6 +93,8 @@ export type AppointmentSearchResponseDto = {
   codConvenio?: number;
   indFatura?: boolean;
   indLanCaixa?: boolean;
+  indexame?: number | boolean | string;
+  indExame?: number | boolean | string;
   nomLocal?: string;
   datNasc?: string;
   numCaixa?: number;

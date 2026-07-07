@@ -43,7 +43,7 @@ export const createFetchHttpClient = (
         "Content-Type": "application/json",
         Accept: "application/json",
         "x-access-token":
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3OTMiLCJpYXQiOjE3ODE2MzM2MDV9.E5PN9xBu3kKIiI92zP9sLdiWfwQrfEZuvuV3yNz4G7Q",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3OTMiLCJpYXQiOjE3ODM0NDY2ODB9.eqO1wF-xbvoOcAZtpHCq4gP3eRODXt2o0duFUlS7GTU",
       },
       body: JSON.stringify(body),
     });

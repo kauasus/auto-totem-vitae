@@ -59,6 +59,29 @@ const pickAppointmentValue = (response: AppointmentSearchResponseDto) => {
   return typeof tableValue === "number" ? tableValue : undefined;
 };
 
+const pickCodTipoGuia = (response: AppointmentSearchResponseDto) => {
+  const rawValue =
+    response.Procedimento?.indexame ??
+    response.Procedimento?.indExame ??
+    response.indexame ??
+    response.indExame;
+
+  if (typeof rawValue === "number") {
+    return rawValue;
+  }
+
+  if (typeof rawValue === "boolean") {
+    return rawValue ? 1 : 0;
+  }
+
+  if (typeof rawValue === "string") {
+    const parsed = Number(rawValue);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
 const mapPatient = (
   response: AppointmentSearchResponseDto,
   cpfInput: string,
@@ -77,7 +100,24 @@ const mapPatient = (
 });
 
 const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => ({
+  codAgenda: response.codAgenda,
   codAtendimento: response.codAtendimento,
+  codPaciente: response.codPaciente ?? response.Paciente?.codPaciente,
+  codMedico: response.codMedico ?? response.Medico?.codMedico,
+  codEspecialidade: response.codEspecialidade,
+  codProcedimento: response.codProcedimento ?? response.Procedimento?.codProcedimento,
+  codConvenio: response.codConvenio ?? response.Convenio?.codConvenio ?? response.Paciente?.codConvenio,
+  indRetorno: response.indRetorno,
+  nomUsuario: response.nomUsuario ?? response.usuarioMarcacao,
+  codTipoGuia: pickCodTipoGuia(response),
+  dscEspecie: response.dscEspecie,
+  nomPaciente: response.Paciente?.nomPaciente ?? response.nomSolicitante ?? response.nomUsuario ?? "",
+  nomProcedimento:
+    response.Procedimento?.nomProcedimento ||
+    response.nomProcedimento ||
+    "",
+  valProcedimento: pickAppointmentValue(response),
+  horInicio: response.horInicio || "",
   medico:
     response.Medico?.nomMedico ||
     response.nomMedico ||

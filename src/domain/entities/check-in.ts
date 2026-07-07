@@ -8,6 +8,8 @@ export type AddressData = {
   uf: string;
 };
 
+export type PaymentMethod = "PIX" | "CREDITO" | "DEBITO";
+
 export type PatientData = {
   nomeCompleto: string;
   cpf: string;
@@ -22,7 +24,21 @@ export type PatientData = {
 };
 
 export type Appointment = {
+  codAgenda?: number;
   codAtendimento?: number;
+  codPaciente?: number;
+  codMedico?: number;
+  codEspecialidade?: number;
+  codProcedimento?: number;
+  codConvenio?: number;
+  indRetorno?: boolean;
+  nomUsuario?: string;
+  codTipoGuia?: number;
+  dscEspecie?: string;
+  nomPaciente?: string;
+  nomProcedimento?: string;
+  valProcedimento?: number;
+  horInicio?: string;
   medico: string;
   especialidade: string;
   procedimento: string;

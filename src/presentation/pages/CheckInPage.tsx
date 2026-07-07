@@ -5,16 +5,19 @@ import Payment from "../../components/Payment";
 import Success from "../../components/Sucess";
 import type {
   Appointment,
+  PaymentMethod,
   PatientData,
   SearchPatientResult,
 } from "../../types";
 import VitaeLogo from "../../components/VitaeLogo";
 import { makeSearchPatientByCpf } from "../../main/factories/make-search-patient-by-cpf";
+import { makeCreateAttendance } from "../../main/factories/make-create-attendance";
 import { makePrintAppointment } from "../../main/factories/make-print-appointment";
 
 type Step = "cpf" | "payment" | "success";
 
 const searchPatientByCpf = makeSearchPatientByCpf();
+const createAttendance = makeCreateAttendance();
 const printAppointment = makePrintAppointment();
 
 const CheckInPage: React.FC = () => {
@@ -48,7 +51,7 @@ const CheckInPage: React.FC = () => {
     return res;
   };
 
-  const handleFinalize = async (method: "PIX" | "CREDITO" | "DEBITO") => {
+  const handleFinalize = async (method: PaymentMethod) => {
     if (!patient || !appointment) {
       throw new Error("Dados insuficientes para imprimir.");
     }
@@ -57,9 +60,22 @@ const CheckInPage: React.FC = () => {
       throw new Error("Forma de pagamento inválida.");
     }
 
-    await printAppointment.execute({
+    const codAtendimento = await createAttendance.execute({
       patient,
       appointment,
+      paymentMethod: method,
+    });
+
+    const appointmentWithAttendance = {
+      ...appointment,
+      codAtendimento,
+    };
+
+    setAppointment(appointmentWithAttendance);
+
+    await printAppointment.execute({
+      patient,
+      appointment: appointmentWithAttendance,
     });
 
     setStep("success");

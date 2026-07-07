@@ -1,8 +1,7 @@
 import React from "react";
 import AddressForm from "./AddressForm";
 import type { AddressData, Appointment, PatientData } from "../types";
-
-type PaymentMethod = "PIX" | "CREDITO" | "DEBITO";
+import type { PaymentMethod } from "../domain/entities/check-in";
 
 interface PaymentProps {
   patient: PatientData;
