@@ -77,7 +77,7 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
       sala: appointment.numSala.toString(),
       corLinha: DEFAULT_COR_LINHA,
       andar: DEFAULT_ANDAR,
-      atendimentoGeradoPor: `Atendimento gerado por ${getAttendanceUserName().toUpperCase()} em ${formatPrintDateTime(new Date())}`,
+      atendimentoGeradoPor: `Recepcionado por ${getAttendanceUserName().toUpperCase()} em ${formatPrintDateTime(new Date())}`,
     };
 
     await this.httpClient.post<void>(this.endpoint, payload);
