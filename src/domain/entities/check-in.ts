@@ -40,6 +40,7 @@ export type Appointment = {
   valProcedimento?: number;
   horInicio?: string;
   medico: string;
+  indSexoMedico: string;
   especialidade: string;
   procedimento: string;
   horario: string;

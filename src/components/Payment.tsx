@@ -38,7 +38,7 @@ const Field: React.FC<{ label: string; value?: string }> = ({
     <div className="text-[11px] uppercase font-bold tracking-widest text-gray-400">
       {label}
     </div>
-    <div className="mt-1 text-sm font-semibold text-gray-800 break-words">
+    <div className="mt-1 text-sm font-semibold text-gray-800 wrap-break-word">
       {value || "-"}
     </div>
   </div>
@@ -52,17 +52,17 @@ const paymentOptions: Array<{
   {
     value: "PIX",
     label: "PIX",
-    description: "Pagamento instantâneo",
+    description: "",
   },
   {
     value: "CREDITO",
     label: "Cartão de Crédito",
-    description: "Confirmar na maquininha/cartão",
+    description: "",
   },
   {
     value: "DEBITO",
     label: "Cartão de Débito",
-    description: "Confirmar na maquininha/cartão",
+    description: "",
   },
 ];
 
@@ -110,20 +110,20 @@ const Payment: React.FC<PaymentProps> = ({
       <div className="p-4 md:p-5 lg:p-6 space-y-4 md:space-y-5 lg:space-y-6 flex-1 min-h-0 overflow-y-auto">
         <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
           <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
-            Dados
+            Dados Pessoais
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             <Field label="Nome" value={patient.nomeCompleto} />
+            <Field label="Nascimento" value={patient.dataNascimento} />
             <Field
               label="Telefone"
               value={patient.telefone || patient.telefone2}
             />
-            <Field label="Nascimento" value={patient.dataNascimento} />
-            <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+            <div className="rounded-xl border border-gray-100 bg-white px-4 py-3 col-span-1 md:col-span-3">
               <div className="text-[11px] uppercase font-bold tracking-widest text-gray-400">
                 Endereço
               </div>
-              <div className="mt-1 text-base font-semibold text-gray-800 break-words leading-tight">
+              <div className="mt-1 text-base font-semibold text-gray-800 wrap-break-word leading-tight">
                 {addressLabel(patient)}
               </div>
               <button
@@ -142,15 +142,15 @@ const Payment: React.FC<PaymentProps> = ({
 
         <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
           <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
-            Consulta
+            Dados do Agendamento
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <Field label="Dr." value={appointment.medico} />
+            <Field label={appointment.indSexoMedico === "Feminino" ? "Dra." : "Dr."} value={appointment.medico} />
             <Field label="Especialidade" value={appointment.especialidade} />
             <Field label="Horário" value={appointment.horario} />
             <Field
               label="Consultório"
-              value={`Consultório ${appointment.numSala}`}
+              value={`${appointment.numSala}`.padStart(2, "0")}
             />
           </div>
         </section>
@@ -200,10 +200,10 @@ const Payment: React.FC<PaymentProps> = ({
               );
             })}
           </div>
-          <p className="text-base text-gray-600">
+          {/* <p className="text-base text-gray-600">
             Em frente do agendamento de pagamento, verificar a
             maquininha/cartão.
-          </p>
+          </p> */}
           {error && (
             <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
               {error}

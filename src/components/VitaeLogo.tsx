@@ -15,8 +15,8 @@ interface VitaeLogoProps {
  * - variant "full" shows monogram + VITAE / Center / subtitle
  */
 const VitaeLogo: React.FC<VitaeLogoProps> = ({
-  width = 220,
-  height = 220,
+  width = 650,
+  height = 650,
   className = "",
   ariaLabel = "Vitae Center",
 }) => {

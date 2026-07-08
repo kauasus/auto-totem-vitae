@@ -123,6 +123,7 @@ const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => 
     response.nomMedico ||
     response.nomSolicitante ||
     "",
+  indSexoMedico: response.Medico?.indSexo || "",
   especialidade: response.dscEspecialidade || "",
   procedimento:
     response.Procedimento?.nomProcedimento ||

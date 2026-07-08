@@ -19,7 +19,7 @@ const NumericKeyboard: React.FC<NumericKeyboardProps> = ({
     // tocar som (somente se permitido)
     if (soundEnabled) playClick(0.1);
     if (k === "←") onKeyPress("backspace");
-    else if (k === "⌫") onKeyPress("clear");
+    else if (k === "⌫") onKeyPress("backspace");
     else onKeyPress(k);
   };
 

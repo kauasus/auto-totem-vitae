@@ -42,6 +42,7 @@ export type MedicoDto = {
   sigUf?: string;
   indAtivo?: boolean;
   obsMedico?: string;
+  indSexo?: string;
 };
 
 export type ProcedimentoDto = {
@@ -86,6 +87,7 @@ export type AppointmentSearchResponseDto = {
   indConfirmacao?: boolean;
   codSituacaoConfirmacao?: number;
   nomMedico?: string;
+  indSexo?: string;
   dscEspecialidade?: string;
   sigEspecialidade?: string;
   nomProcedimento?: string;
@@ -103,7 +105,6 @@ export type AppointmentSearchResponseDto = {
   Convenio?: ConvenioDto;
   Medico?: MedicoDto;
   Procedimento?: ProcedimentoDto;
-  
 };
 
 export type MunicipioDto = {

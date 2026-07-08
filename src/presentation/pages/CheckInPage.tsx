@@ -112,8 +112,6 @@ const CheckInPage: React.FC = () => {
               <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full scale-150 animate-pulse" />
               <div className="relative z-10">
                 <VitaeLogo
-                  width={220}
-                  height={220}
                   className="vitae-animated"
                   animate={true}
                 />

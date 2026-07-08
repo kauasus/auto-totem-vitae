@@ -7,7 +7,7 @@ export type PrintAppointmentRequest = {
   paciente: string;
   medico: string;
   procedimento: string;
-  sala: number;
+  sala: string;
   corLinha: string;
   andar: string;
   atendimentoGeradoPor?: string;
@@ -29,22 +29,22 @@ const formatPrintDateTime = (date: Date) =>
     timeStyle: "short",
   }).format(date);
 
-const formatDoctorLabel = (value: string) => {
-  const normalized = value.trim();
+// const formatDoctorLabel = (value: string) => {
+//   const normalized = value.trim();
 
-  if (!normalized) {
-    return normalized;
-  }
+//   if (!normalized) {
+//     return normalized;
+//   }
 
-  if (/^(dr\.?|dra\.?)\b/i.test(normalized)) {
-    return normalized.replace(/^(dr\.?|dra\.?)\b/i, (match) => {
-      const lower = match.toLowerCase();
-      return lower.startsWith("dra") ? "Dra." : "Dr.";
-    });
-  }
+//   if (/^(dr\.?|dra\.?)\b/i.test(normalized)) {
+//     return normalized.replace(/^(dr\.?|dra\.?)\b/i, (match) => {
+//       const lower = match.toLowerCase();
+//       return lower.startsWith("dra") ? "Dra." : "Dr.";
+//     });
+//   }
 
-  return `Dr. ${normalized}`;
-};
+//   return `Dr. ${normalized}`;
+// };
 
 export class RemotePrintAppointment implements PrintAppointmentUseCase {
   private readonly httpClient: PrinterHttpClient;
@@ -72,12 +72,12 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
     const payload: PrintAppointmentRequest = {
       codAtendimento: appointment.codAtendimento,
       paciente: patient.nomeCompleto,
-      medico: formatDoctorLabel(appointment.medico),
+      medico: `${appointment.indSexoMedico === "Feminino" ? "DRA." : "DR."} ${appointment.medico}`,
       procedimento: appointment.procedimento,
-      sala: appointment.numSala,
+      sala: appointment.numSala.toString(),
       corLinha: DEFAULT_COR_LINHA,
       andar: DEFAULT_ANDAR,
-      atendimentoGeradoPor: `Atendimento gerado por ${getAttendanceUserName()} em ${formatPrintDateTime(new Date())}`,
+      atendimentoGeradoPor: `Atendimento gerado por ${getAttendanceUserName().toUpperCase()} em ${formatPrintDateTime(new Date())}`,
     };
 
     await this.httpClient.post<void>(this.endpoint, payload);
