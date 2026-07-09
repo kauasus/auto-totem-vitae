@@ -73,7 +73,7 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
       codAtendimento: appointment.codAtendimento,
       paciente: `${patient.nomeCompleto} - ${appointment.convenio ?? ''}`,
       medico: `${appointment.indSexoMedico === "Feminino" ? "DRA." : "DR."} ${appointment.medico}`,
-      procedimento: `${appointment.procedimento} ${appointment.indRetorno ?? '- RETORNO'}`,
+      procedimento: `${appointment.procedimento} ${appointment.indRetorno ? '- RETORNO' : ''}`,
       sala: appointment.numSala.toString(),
       corLinha: DEFAULT_COR_LINHA,
       andar: DEFAULT_ANDAR,
