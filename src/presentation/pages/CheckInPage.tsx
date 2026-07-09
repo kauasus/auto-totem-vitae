@@ -57,7 +57,12 @@ const CheckInPage: React.FC = () => {
       throw new Error("Dados insuficientes para imprimir.");
     }
 
-    if (method !== "PIX" && method !== "Cartão Crédito" && method !== "Cartão Débito" && method !== "Retorno") {
+    if (
+      method !== "PIX" &&
+      method !== "Cartão Crédito" &&
+      method !== "Cartão Débito" &&
+      method !== "Retorno"
+    ) {
       throw new Error("Forma de pagamento inválida.");
     }
 
@@ -103,6 +108,7 @@ const CheckInPage: React.FC = () => {
             exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
             className="fixed inset-0 z-1000 bg-white-300 flex flex-col items-center justify-center"
+            onClick={handleStart}
           >
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -112,10 +118,7 @@ const CheckInPage: React.FC = () => {
             >
               <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full scale-150 animate-pulse" />
               <div className="relative z-10">
-                <VitaeLogo
-                  className="vitae-animated"
-                  animate={true}
-                />
+                <VitaeLogo className="vitae-animated" animate={true} />
               </div>
             </motion.div>
 
