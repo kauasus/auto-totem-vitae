@@ -31,6 +31,7 @@ export type Appointment = {
   codEspecialidade?: number;
   codProcedimento?: number;
   codConvenio?: number;
+  convenio: string;
   indRetorno?: boolean;
   nomUsuario?: string;
   codTipoGuia?: number;

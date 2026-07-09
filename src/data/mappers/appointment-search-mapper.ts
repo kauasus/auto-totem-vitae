@@ -37,10 +37,7 @@ const pickAddress = (response: AppointmentSearchResponseDto) => {
 
   return {
     cep: asString(patient?.codEndrcmntPstl),
-    logradouro: [
-      patient?.abrLogradouro,
-      patient?.nomLogradouro,
-    ]
+    logradouro: [patient?.abrLogradouro, patient?.nomLogradouro]
       .filter(Boolean)
       .join(" ")
       .trim(),
@@ -54,7 +51,8 @@ const pickAddress = (response: AppointmentSearchResponseDto) => {
 };
 
 const pickAppointmentValue = (response: AppointmentSearchResponseDto) => {
-  const tableValue = response.Procedimento?.procedimentoTabela?.[0]?.valProcedimento;
+  const tableValue =
+    response.Procedimento?.procedimentoTabela?.[0]?.valProcedimento;
 
   return typeof tableValue === "number" ? tableValue : undefined;
 };
@@ -99,23 +97,32 @@ const mapPatient = (
   address: pickAddress(response),
 });
 
-const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => ({
+const mapAppointment = (
+  response: AppointmentSearchResponseDto,
+): Appointment => ({
   codAgenda: response.codAgenda,
   codAtendimento: response.codAtendimento,
   codPaciente: response.codPaciente ?? response.Paciente?.codPaciente,
   codMedico: response.codMedico ?? response.Medico?.codMedico,
   codEspecialidade: response.codEspecialidade,
-  codProcedimento: response.codProcedimento ?? response.Procedimento?.codProcedimento,
-  codConvenio: response.codConvenio ?? response.Convenio?.codConvenio ?? response.Paciente?.codConvenio,
+  codProcedimento:
+    response.codProcedimento ?? response.Procedimento?.codProcedimento,
+  codConvenio:
+    response.codConvenio ??
+    response.Convenio?.codConvenio ??
+    response.Paciente?.codConvenio,
+  convenio: response.Convenio?.nomConvenio || "",
   indRetorno: response.indRetorno,
   nomUsuario: response.nomUsuario ?? response.usuarioMarcacao,
   codTipoGuia: pickCodTipoGuia(response),
   dscEspecie: response.dscEspecie,
-  nomPaciente: response.Paciente?.nomPaciente ?? response.nomSolicitante ?? response.nomUsuario ?? "",
-  nomProcedimento:
-    response.Procedimento?.nomProcedimento ||
-    response.nomProcedimento ||
+  nomPaciente:
+    response.Paciente?.nomPaciente ??
+    response.nomSolicitante ??
+    response.nomUsuario ??
     "",
+  nomProcedimento:
+    response.Procedimento?.nomProcedimento || response.nomProcedimento || "",
   valProcedimento: pickAppointmentValue(response),
   horInicio: response.horInicio || "",
   medico:
@@ -126,9 +133,7 @@ const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => 
   indSexoMedico: response.Medico?.indSexo || "",
   especialidade: response.dscEspecialidade || "",
   procedimento:
-    response.Procedimento?.nomProcedimento ||
-    response.nomProcedimento ||
-    "",
+    response.Procedimento?.nomProcedimento || response.nomProcedimento || "",
   horario: formatApiTime(response.horInicio || ""),
   numSala: response.numSala || 0,
   sala: asString(response.numSala),
