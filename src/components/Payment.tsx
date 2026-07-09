@@ -55,12 +55,12 @@ const paymentOptions: Array<{
     description: "",
   },
   {
-    value: "CREDITO",
+    value: "Cartão Crédito",
     label: "Cartão de Crédito",
     description: "",
   },
   {
-    value: "DEBITO",
+    value: "Cartão Débito",
     label: "Cartão de Débito",
     description: "",
   },
@@ -73,7 +73,7 @@ const Payment: React.FC<PaymentProps> = ({
   onConfirm,
   onAddressChange,
 }) => {
-  const [method, setMethod] = React.useState<PaymentMethod | "">("");
+  const [method, setMethod] = React.useState<PaymentMethod>("Retorno");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isAddressOpen, setIsAddressOpen] = React.useState(false);
@@ -82,6 +82,7 @@ const Payment: React.FC<PaymentProps> = ({
     if (!method) return;
     setIsSubmitting(true);
     setError(null);
+
     try {
       await onConfirm(method);
     } catch (confirmError) {
@@ -145,7 +146,10 @@ const Payment: React.FC<PaymentProps> = ({
             Dados do Agendamento
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <Field label={appointment.indSexoMedico === "Feminino" ? "Dra." : "Dr."} value={appointment.medico} />
+            <Field
+              label={appointment.indSexoMedico === "Feminino" ? "Dra." : "Dr."}
+              value={appointment.medico}
+            />
             <Field label="Especialidade" value={appointment.especialidade} />
             <Field label="Horário" value={appointment.horario} />
             <Field
@@ -154,62 +158,63 @@ const Payment: React.FC<PaymentProps> = ({
             />
           </div>
         </section>
-
-        <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
-          <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
-            Pagamento
-          </h4>
-          <Field label="Valor" value={priceLabel(appointment.valor)} />
-          <div className="text-base font-semibold text-gray-700">
-            Caixinha para selecionar e pagar
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            {paymentOptions.map((option) => {
-              const selected = method === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setMethod(option.value)}
-                  className={[
-                    "rounded-xl border px-4 py-4 text-left transition-all",
-                    selected
-                      ? "border-[#a31515] bg-[#fff1f1] shadow-sm"
-                      : "border-gray-200 bg-white hover:border-[#d9a5a5]",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={[
-                        "mt-1 h-5 w-5 rounded-full border-2",
-                        selected
-                          ? "border-[#a31515] bg-[#a31515]"
-                          : "border-gray-300 bg-white",
-                      ].join(" ")}
-                    />
-                    <div>
-                      <div className="text-base font-bold text-gray-900">
-                        {option.label}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {option.description}
+        {!appointment.indRetorno && (
+          <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
+            <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
+              Pagamento
+            </h4>
+            <Field label="Valor" value={priceLabel(appointment.valor)} />
+            <div className="text-base font-semibold text-gray-700">
+              Selecione a forma de pagamento
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+              {paymentOptions.map((option) => {
+                const selected = method === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setMethod(option.value)}
+                    className={[
+                      "rounded-xl border px-4 py-4 text-left transition-all",
+                      selected
+                        ? "border-[#a31515] bg-[#fff1f1] shadow-sm"
+                        : "border-gray-200 bg-white hover:border-[#d9a5a5]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className={[
+                          "mt-1 h-5 w-5 rounded-full border-2",
+                          selected
+                            ? "border-[#a31515] bg-[#a31515]"
+                            : "border-gray-300 bg-white",
+                        ].join(" ")}
+                      />
+                      <div>
+                        <div className="text-base font-bold text-gray-900">
+                          {option.label}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {option.description}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-          {/* <p className="text-base text-gray-600">
+                  </button>
+                );
+              })}
+            </div>
+            {/* <p className="text-base text-gray-600">
             Em frente do agendamento de pagamento, verificar a
             maquininha/cartão.
           </p> */}
-          {error && (
-            <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-              {error}
-            </div>
-          )}
-        </section>
+          </section>
+        )}
+        {error && (
+          <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+            {error}
+          </div>
+        )}
       </div>
 
       <footer className="flex items-center justify-between px-4 py-4 md:px-6 md:py-5 border-t border-gray-100 bg-white">
@@ -221,15 +226,23 @@ const Payment: React.FC<PaymentProps> = ({
         </button>
         <button
           onClick={() => void handleConfirm()}
-          disabled={!method || isSubmitting}
+          disabled={
+            isSubmitting || (method === "Retorno" && !appointment?.indRetorno)
+          }
           className={[
             "px-10 py-4 rounded-xl font-bold text-xl transition-all",
-            !method || isSubmitting
+            isSubmitting ||
+            (method === "Retorno" && !appointment?.indRetorno) ||
+            (!method && !appointment?.indRetorno)
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-[#a31515] text-white shadow-lg hover:bg-[#8b1212] active:scale-95",
           ].join(" ")}
         >
-          {isSubmitting ? "Confirmando..." : "Concluir Pagamento"}
+          {isSubmitting
+            ? "Confirmando..."
+            : appointment.indRetorno
+              ? "Concluir Recepção"
+              : "Concluir Pagamento"}
         </button>
       </footer>
     </div>

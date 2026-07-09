@@ -6,9 +6,14 @@ import { fireConfetti } from "../utils/confetti";
 interface SuccessProps {
   patient?: PatientData | null;
   consultorio: string;
+  indRetorno?: boolean;
 }
 
-const Success: React.FC<SuccessProps> = ({ patient, consultorio }) => {
+const Success: React.FC<SuccessProps> = ({
+  patient,
+  consultorio,
+  indRetorno,
+}) => {
   useEffect(() => {
     // dispara confete quando o componente monta
     fireConfetti();
@@ -18,7 +23,9 @@ const Success: React.FC<SuccessProps> = ({ patient, consultorio }) => {
     <div className="animate-fade-slide-up text-center py-8">
       <div className="flex flex-col items-center gap-4">
         <CheckCircle className="w-24 h-24 text-green-500" />
-        <h2 className="text-2xl font-bold">Pagamento confirmado!</h2>
+        <h2 className="text-2xl font-bold">
+          {indRetorno ? "Retorno confirmado!" : "Pagamento confirmado!"}
+        </h2>
         <p className="text-lg">
           Obrigado,{" "}
           <span className="font-semibold">

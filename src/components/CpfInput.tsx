@@ -121,7 +121,7 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
         />
 
         <p className="text-sm text-gray-400 mb-5">
-          Apenas números. Ex.: 123.456.789-00
+          Apenas números. Ex.: 12345678900
         </p>
 
         {error && <div className="text-base text-red-600 mb-3">{error}</div>}

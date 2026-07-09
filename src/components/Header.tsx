@@ -10,7 +10,7 @@ const Header: React.FC<HeaderProps> = ({
   subtitle,
 }) => {
   return (
-    <header className="rounded-t-lg bg-gradient-to-r from-[#b42222] to-[#8b1212] text-white p-4">
+    <header className="rounded-t-lg bg-linear-to-r from-[#b42222] to-[#8b1212] text-white p-4">
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <div>

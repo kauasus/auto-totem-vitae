@@ -8,7 +8,7 @@ export type AddressData = {
   uf: string;
 };
 
-export type PaymentMethod = "PIX" | "CREDITO" | "DEBITO";
+export type PaymentMethod = "PIX" | "Cartão Crédito" | "Cartão Débito" | "Retorno";
 
 export type PatientData = {
   nomeCompleto: string;

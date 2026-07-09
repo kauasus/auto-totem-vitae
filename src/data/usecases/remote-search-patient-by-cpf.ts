@@ -49,16 +49,19 @@ export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
       if (!response) {
         return {
           found: false,
-          message: "CPF não encontrado.",
+          message:
+            "Agendamento não encontrado com o CPF informado. Verifique o CPF e tente novamente.",
         };
       }
 
-      const convenioCode = getConvenioCode(response);
-      if (convenioCode !== ENABLED_CONVENIO_CODE) {
-        return {
-          found: false,
-          message: CONVENIO_BLOCK_MESSAGE,
-        };
+      if (!response.indRetorno) {
+        const convenioCode = getConvenioCode(response);
+        if (convenioCode !== ENABLED_CONVENIO_CODE) {
+          return {
+            found: false,
+            message: CONVENIO_BLOCK_MESSAGE,
+          };
+        }
       }
 
       return mapAppointmentSearchResponse(response, cpf);

@@ -52,11 +52,12 @@ const CheckInPage: React.FC = () => {
   };
 
   const handleFinalize = async (method: PaymentMethod) => {
+    console.log(method);
     if (!patient || !appointment) {
       throw new Error("Dados insuficientes para imprimir.");
     }
 
-    if (method !== "PIX" && method !== "CREDITO" && method !== "DEBITO") {
+    if (method !== "PIX" && method !== "Cartão Crédito" && method !== "Cartão Débito" && method !== "Retorno") {
       throw new Error("Forma de pagamento inválida.");
     }
 
@@ -101,7 +102,7 @@ const CheckInPage: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="fixed inset-0 z-[1000] bg-white-300 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-1000 bg-white-300 flex flex-col items-center justify-center"
           >
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -143,7 +144,7 @@ const CheckInPage: React.FC = () => {
             className="w-[96vw] max-w-[1080px] h-[96vh]"
           >
             <div className="rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 h-full flex flex-col">
-              <div className="bg-gradient-to-r from-[#b42222] to-[#8b1212] text-white p-6 md:p-7 lg:p-8">
+              <div className="bg-linear-to-r from-[#b42222] to-[#8b1212] text-white p-6 md:p-7 lg:p-8">
                 <h1 className="font-black uppercase tracking-tighter text-2xl md:text-3xl lg:text-4xl text-center drop-shadow-md">
                   {subtitleMap[step]}
                 </h1>
@@ -188,6 +189,7 @@ const CheckInPage: React.FC = () => {
                             ? `Consultório ${appointment.numSala}`
                             : "Consultório 3"
                         }
+                        indRetorno={appointment?.indRetorno}
                       />
                     )}
                   </motion.div>
