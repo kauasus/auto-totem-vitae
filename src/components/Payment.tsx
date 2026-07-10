@@ -150,7 +150,10 @@ const Payment: React.FC<PaymentProps> = ({
               label={appointment.indSexoMedico === "Feminino" ? "Dra." : "Dr."}
               value={appointment.medico}
             />
-            <Field label="Especialidade" value={appointment.especialidade} />
+            <Field
+              label="Serviço"
+              value={`${appointment.nomProcedimento} ${appointment.indRetorno ? "Retorno" : ""}`}
+            />
             <Field label="Horário" value={appointment.horario} />
             <Field
               label="Consultório"
