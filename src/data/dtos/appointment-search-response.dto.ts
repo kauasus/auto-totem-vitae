@@ -112,3 +112,8 @@ export type MunicipioDto = {
   dscMunicipio: string;
   dscDistrito: string;
 };
+
+export type LogDTO = {
+  dscAcao: string;
+  nomUsuario: string;
+}

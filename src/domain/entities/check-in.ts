@@ -58,3 +58,10 @@ export type SearchPatientResult = {
   appointment?: Appointment;
   message?: string;
 };
+
+
+export type LogPrograma = {
+
+  dscAcao: string
+  nomUsuario: string
+}

@@ -13,12 +13,15 @@ import VitaeLogo from "../../components/VitaeLogo";
 import { makeSearchPatientByCpf } from "../../main/factories/make-search-patient-by-cpf";
 import { makeCreateAttendance } from "../../main/factories/make-create-attendance";
 import { makePrintAppointment } from "../../main/factories/make-print-appointment";
+import { makeRunLog } from "../../main/factories/make-register-log";
+import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 type Step = "cpf" | "payment" | "success";
 
 const searchPatientByCpf = makeSearchPatientByCpf();
 const createAttendance = makeCreateAttendance();
 const printAppointment = makePrintAppointment();
+const runLog = makeRunLog();
 
 const CheckInPage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -46,6 +49,11 @@ const CheckInPage: React.FC = () => {
       setPatient(res.patient);
       setAppointment(res.appointment ?? null);
       setStep("payment");
+
+      await runLog.execute({
+        dscAcao: `Atendimento iniciado pelo cpf ${cpfNums}, CodAgenda: ${appointment?.codAgenda}, no ${getAttendanceUserName().toUpperCase()}`,
+        nomUsuario: getAttendanceUserName().toUpperCase(),
+      });
     }
 
     return res;
@@ -57,7 +65,12 @@ const CheckInPage: React.FC = () => {
       throw new Error("Dados insuficientes para imprimir.");
     }
 
-    if (method !== "PIX" && method !== "Cartão Crédito" && method !== "Cartão Débito" && method !== "Retorno") {
+    if (
+      method !== "PIX" &&
+      method !== "Cartão Crédito" &&
+      method !== "Cartão Débito" &&
+      method !== "Retorno"
+    ) {
       throw new Error("Forma de pagamento inválida.");
     }
 
@@ -112,10 +125,7 @@ const CheckInPage: React.FC = () => {
             >
               <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full scale-150 animate-pulse" />
               <div className="relative z-10">
-                <VitaeLogo
-                  className="vitae-animated"
-                  animate={true}
-                />
+                <VitaeLogo className="vitae-animated" animate={true} />
               </div>
             </motion.div>
 

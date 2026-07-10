@@ -12,6 +12,8 @@ import {
   normalizeCpf,
 } from "../../validation";
 
+
+
 const asString = (value: string | number | boolean | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
 
@@ -100,6 +102,8 @@ const mapPatient = (
 });
 
 const mapAppointment = (response: AppointmentSearchResponseDto): Appointment => ({
+  
+  
   codAgenda: response.codAgenda,
   codAtendimento: response.codAtendimento,
   codPaciente: response.codPaciente ?? response.Paciente?.codPaciente,

@@ -9,6 +9,8 @@ const ENABLED_CONVENIO_CODE = 31;
 const CONVENIO_BLOCK_MESSAGE =
   "Este convênio ainda não está habilitado para auto-atendimento. Estamos trabalhando para ampliar nossa rede de convênios aceitos.";
 
+
+ 
 const getConvenioCode = (response: AppointmentSearchResponseDto) =>
   response.codConvenio ??
   response.Convenio?.codConvenio ??
@@ -22,6 +24,7 @@ export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
     this.httpClient = httpClient;
     this.endpoint = endpoint;
   }
+  
 
   async execute(cpfInput: string): Promise<SearchPatientResult> {
     const cpf = normalizeCpf(cpfInput);
