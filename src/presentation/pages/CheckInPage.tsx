@@ -116,6 +116,7 @@ const CheckInPage: React.FC = () => {
             exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
             className="fixed inset-0 z-1000 bg-white-300 flex flex-col items-center justify-center"
+            onClick={handleStart}
           >
             <motion.div
               initial={{ y: 20, opacity: 0 }}

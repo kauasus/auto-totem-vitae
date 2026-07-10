@@ -163,7 +163,10 @@ const Payment: React.FC<PaymentProps> = ({
             <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
               Pagamento
             </h4>
-            <Field label="Valor" value={priceLabel(appointment.valor)} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <Field label="Valor" value={priceLabel(appointment.valor)} />
+              <Field label="Convênio" value={appointment.convenio} />
+            </div>
             <div className="text-base font-semibold text-gray-700">
               Selecione a forma de pagamento
             </div>
