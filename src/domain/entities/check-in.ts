@@ -51,6 +51,7 @@ export type Appointment = {
   local?: string;
   dataAgenda?: string;
   dataMarcacao?: string;
+  andar: string;
 };
 
 export type SearchPatientResult = {

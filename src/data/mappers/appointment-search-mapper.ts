@@ -141,6 +141,7 @@ const mapAppointment = (
   dataAgenda: formatApiDate(response.datAgenda || ""),
   dataMarcacao: formatApiDate(response.datMarcacao || ""),
   valor: pickAppointmentValue(response),
+  andar: response.Sala.dscAndar || "",
 });
 
 export const mapAppointmentSearchResponse = (

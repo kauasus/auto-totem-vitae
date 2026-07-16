@@ -21,7 +21,6 @@ export interface PrintAppointmentUseCase {
 }
 
 const DEFAULT_COR_LINHA = "VERDE";
-const DEFAULT_ANDAR = "1";
 
 const formatPrintDateTime = (date: Date) =>
   new Intl.DateTimeFormat("pt-BR", {
@@ -76,7 +75,7 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
       procedimento: appointment.procedimento,
       sala: appointment.numSala.toString(),
       corLinha: DEFAULT_COR_LINHA,
-      andar: DEFAULT_ANDAR,
+      andar: appointment.andar,
       atendimentoGeradoPor: `Recepcionado por ${getAttendanceUserName().toUpperCase()} em ${formatPrintDateTime(new Date())}`,
     };
 

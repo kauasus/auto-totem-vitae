@@ -105,6 +105,7 @@ export type AppointmentSearchResponseDto = {
   Convenio?: ConvenioDto;
   Medico?: MedicoDto;
   Procedimento?: ProcedimentoDto;
+  Sala: Sala;
 };
 
 export type MunicipioDto = {
@@ -116,4 +117,12 @@ export type MunicipioDto = {
 export type LogDTO = {
   dscAcao: string;
   nomUsuario: string;
-}
+};
+
+export type Sala = {
+  codLocal: number;
+  numSala: number;
+  dscSala: string;
+  dscObservacao: string;
+  dscAndar: string;
+};
