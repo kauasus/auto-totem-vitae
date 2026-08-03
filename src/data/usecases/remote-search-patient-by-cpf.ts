@@ -16,6 +16,13 @@ const getConvenioCode = (response: AppointmentSearchResponseDto) =>
   response.Convenio?.codConvenio ??
   response.Paciente?.codConvenio;
 
+const isEnabledFlag = (value: boolean | number | string | undefined) =>
+  value === true || value === 1 || String(value).toLowerCase() === "true";
+
+const isLanCaixaEnabled = (response: AppointmentSearchResponseDto) =>
+  isEnabledFlag(response.indLanCaixa) ||
+  isEnabledFlag(response.Convenio?.indLanCaixa);
+
 export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
   private readonly httpClient: HttpClient;
   private readonly endpoint: string;
@@ -59,7 +66,10 @@ export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
 
       if (!response.indRetorno) {
         const convenioCode = getConvenioCode(response);
-        if (convenioCode !== ENABLED_CONVENIO_CODE) {
+        if (
+          convenioCode !== ENABLED_CONVENIO_CODE &&
+          !isLanCaixaEnabled(response)
+        ) {
           return {
             found: false,
             message: CONVENIO_BLOCK_MESSAGE,

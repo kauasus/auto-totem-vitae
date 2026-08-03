@@ -84,6 +84,7 @@ const mapPatient = (
   response: AppointmentSearchResponseDto,
   cpfInput: string,
 ): PatientData => ({
+  codPaciente: response.codPaciente ?? response.Paciente?.codPaciente,
   nomeCompleto: pickPatientName(response),
   cpf: pickDisplayCpf(pickCpf(response) || cpfInput),
   telefone: formatPhone(

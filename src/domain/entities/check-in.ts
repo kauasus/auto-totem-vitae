@@ -11,6 +11,7 @@ export type AddressData = {
 export type PaymentMethod = "PIX" | "Cartão Crédito" | "Cartão Débito" | "Retorno";
 
 export type PatientData = {
+  codPaciente?: number;
   nomeCompleto: string;
   cpf: string;
   rg?: string;

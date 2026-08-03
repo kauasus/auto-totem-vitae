@@ -9,6 +9,7 @@ export type PatientDto = {
   dscCmplmntEndrc?: string;
   nomBairro?: string;
   codMunicipio?: number;
+  dscMunicipo: string;
   sigUnidadeFederacao?: string;
   codEndrcmntPstl?: string;
   datNascimento?: string;
@@ -28,7 +29,7 @@ export type ConvenioDto = {
   codConvenio?: number;
   nomConvenio?: string;
   indAtivo?: boolean;
-  indLanCaixa?: boolean;
+  indLanCaixa?: boolean | number | string;
   indFatura?: boolean;
   dscObservacao?: string;
   diasCarenciaRet?: number;
@@ -94,7 +95,7 @@ export type AppointmentSearchResponseDto = {
   nomConvenio?: string;
   codConvenio?: number;
   indFatura?: boolean;
-  indLanCaixa?: boolean;
+  indLanCaixa?: boolean | number | string;
   indexame?: number | boolean | string;
   indExame?: number | boolean | string;
   nomLocal?: string;

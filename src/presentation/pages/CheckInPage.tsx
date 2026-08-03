@@ -14,6 +14,8 @@ import { makeSearchPatientByCpf } from "../../main/factories/make-search-patient
 import { makeCreateAttendance } from "../../main/factories/make-create-attendance";
 import { makePrintAppointment } from "../../main/factories/make-print-appointment";
 import { makeRunLog } from "../../main/factories/make-register-log";
+import { makeUpdatePatientRegistration } from "../../main/factories/make-update-patient-registration";
+import { makeIssueServiceInvoice } from "../../main/factories/make-issue-service-invoice";
 import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 type Step = "cpf" | "payment" | "success";
@@ -22,6 +24,8 @@ const searchPatientByCpf = makeSearchPatientByCpf();
 const createAttendance = makeCreateAttendance();
 const printAppointment = makePrintAppointment();
 const runLog = makeRunLog();
+const updatePatientRegistration = makeUpdatePatientRegistration();
+const issueServiceInvoice = makeIssueServiceInvoice();
 
 const CheckInPage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -30,6 +34,7 @@ const CheckInPage: React.FC = () => {
   const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState("");
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [registrationChanged, setRegistrationChanged] = useState(false);
 
   const handleStart = () => setShowSplash(false);
 
@@ -37,6 +42,7 @@ const CheckInPage: React.FC = () => {
     setPatient(null);
     setAppointment(null);
     setCpfOnlyNumbers("");
+    setRegistrationChanged(false);
     setStep("cpf");
   };
 
@@ -86,6 +92,20 @@ const CheckInPage: React.FC = () => {
     };
 
     setAppointment(appointmentWithAttendance);
+
+    if (registrationChanged) {
+      await updatePatientRegistration.execute({
+        patient,
+        appointment: appointmentWithAttendance,
+      });
+    }
+
+    if (!appointmentWithAttendance.indRetorno) {
+      await issueServiceInvoice.execute({
+        patient,
+        appointment: appointmentWithAttendance,
+      });
+    }
 
     await printAppointment.execute({
       patient,
@@ -185,8 +205,15 @@ const CheckInPage: React.FC = () => {
                         onBack={handleRestart}
                         onConfirm={handleFinalize}
                         onAddressChange={(address) => {
+                          setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, address } : current,
+                          );
+                        }}
+                        onPhoneChange={(telefone) => {
+                          setRegistrationChanged(true);
+                          setPatient((current) =>
+                            current ? { ...current, telefone } : current,
                           );
                         }}
                       />

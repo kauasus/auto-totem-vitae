@@ -1,7 +1,10 @@
 import React from "react";
+import { Keyboard } from "lucide-react";
 import AddressForm from "./AddressForm";
+import FieldKeyboardModal from "./FieldKeyboardModal";
 import type { AddressData, Appointment, PatientData } from "../types";
 import type { PaymentMethod } from "../domain/entities/check-in";
+import { formatPhone, onlyDigits } from "../utils/validation";
 
 interface PaymentProps {
   patient: PatientData;
@@ -9,6 +12,7 @@ interface PaymentProps {
   onBack: () => void;
   onConfirm: (method: PaymentMethod) => Promise<void>;
   onAddressChange: (address: AddressData) => void;
+  onPhoneChange: (telefone: string) => void;
 }
 
 const priceLabel = (v?: number) =>
@@ -44,6 +48,27 @@ const Field: React.FC<{ label: string; value?: string }> = ({
   </div>
 );
 
+const EditableField: React.FC<{
+  label: string;
+  value?: string;
+  placeholder: string;
+  onClick: () => void;
+}> = ({ label, value, placeholder, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="rounded-xl border border-gray-100 bg-white px-4 py-3 text-left transition hover:border-[#b91c1c] hover:shadow-sm active:scale-[0.99]"
+  >
+    <div className="flex items-center gap-2 text-[11px] uppercase font-bold tracking-widest text-gray-400">
+      <span>{label}</span>
+      <Keyboard className="h-3.5 w-3.5 text-gray-300" />
+    </div>
+    <div className="mt-1 text-sm font-semibold text-gray-800 wrap-break-word">
+      {value || <span className="text-gray-400">{placeholder}</span>}
+    </div>
+  </button>
+);
+
 const paymentOptions: Array<{
   value: PaymentMethod;
   label: string;
@@ -72,11 +97,13 @@ const Payment: React.FC<PaymentProps> = ({
   onBack,
   onConfirm,
   onAddressChange,
+  onPhoneChange,
 }) => {
   const [method, setMethod] = React.useState<PaymentMethod>("Retorno");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isAddressOpen, setIsAddressOpen] = React.useState(false);
+  const [isPhoneOpen, setIsPhoneOpen] = React.useState(false);
 
   const handleConfirm = async () => {
     if (!method) return;
@@ -116,9 +143,11 @@ const Payment: React.FC<PaymentProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             <Field label="Nome" value={patient.nomeCompleto} />
             <Field label="Nascimento" value={patient.dataNascimento} />
-            <Field
+            <EditableField
               label="Telefone"
               value={patient.telefone || patient.telefone2}
+              placeholder="Digite o telefone"
+              onClick={() => setIsPhoneOpen(true)}
             />
             <div className="rounded-xl border border-gray-100 bg-white px-4 py-3 col-span-1 md:col-span-3">
               <div className="text-[11px] uppercase font-bold tracking-widest text-gray-400">
@@ -251,6 +280,23 @@ const Payment: React.FC<PaymentProps> = ({
               : "Concluir Pagamento"}
         </button>
       </footer>
+
+      <FieldKeyboardModal
+        key={`phone-${patient.telefone ?? patient.telefone2 ?? ""}`}
+        open={isPhoneOpen}
+        title="Telefone"
+        subtitle="Digite o telefone com DDD."
+        value={onlyDigits(patient.telefone || patient.telefone2 || "")}
+        keyboardKind="numeric"
+        placeholder="11999999999"
+        maxLength={11}
+        previewFormatter={formatPhone}
+        onClose={() => setIsPhoneOpen(false)}
+        onConfirm={(nextValue) => {
+          onPhoneChange(formatPhone(nextValue));
+          setIsPhoneOpen(false);
+        }}
+      />
     </div>
   );
 };
