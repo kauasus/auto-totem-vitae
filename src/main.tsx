@@ -4,7 +4,7 @@ import App from "./App";
 import "./index.css";
 import { setAttendanceUserName } from "./infra/auth/attendance-user-storage";
 
-setAttendanceUserName("Totem 1");
+setAttendanceUserName(import.meta.env.VITE_ATENDIMENTO_NOM_USUARIO);
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

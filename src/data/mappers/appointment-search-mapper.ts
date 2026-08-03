@@ -143,6 +143,7 @@ const mapAppointment = (
   dataMarcacao: formatApiDate(response.datMarcacao || ""),
   valor: pickAppointmentValue(response),
   andar: response.Sala.dscAndar || "",
+  corLinha: response.Sala.Setor.corLinha || "",
 });
 
 export const mapAppointmentSearchResponse = (

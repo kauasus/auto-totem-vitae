@@ -53,6 +53,7 @@ export type Appointment = {
   dataAgenda?: string;
   dataMarcacao?: string;
   andar: string;
+  corLinha: string;
 };
 
 export type SearchPatientResult = {

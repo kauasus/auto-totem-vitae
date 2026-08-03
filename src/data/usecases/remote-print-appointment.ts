@@ -20,8 +20,6 @@ export interface PrintAppointmentUseCase {
   }): Promise<void>;
 }
 
-const DEFAULT_COR_LINHA = "VERDE";
-
 const formatPrintDateTime = (date: Date) =>
   new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
@@ -74,7 +72,7 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
       medico: `${appointment.indSexoMedico === "Feminino" ? "DRA." : "DR."} ${appointment.medico}`,
       procedimento: appointment.procedimento,
       sala: appointment.numSala.toString(),
-      corLinha: DEFAULT_COR_LINHA,
+      corLinha: appointment.corLinha,
       andar: appointment.andar,
       atendimentoGeradoPor: `Recepcionado por ${getAttendanceUserName().toUpperCase()} em ${formatPrintDateTime(new Date())}`,
     };

@@ -44,8 +44,7 @@ export const createFetchHttpClient = (
         "Content-Type": "application/json",
         Accept: "application/json",
         "x-access-token":
-          import.meta.env.VITE_TOKEN_API ??
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEzOTYiLCJpYXQiOjE3ODQ3MzY1NzJ9.AqHLAdzPlGme-qht4IOXj7koYbLsDfUMWJPo2eOczNQ",
+          import.meta.env.VITE_TOKEN_API 
       },
       body: JSON.stringify(body),
     });
@@ -73,8 +72,8 @@ export const createFetchHttpClient = (
         "Content-Type": "application/json",
         Accept: "application/json",
         "x-access-token":
-          import.meta.env.VITE_TOKEN_API ??
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3MjMiLCJpYXQiOjE3ODQ1NjkyOTR9.OE0sifTR6hcCRxcD8BIxDXl0BvB63nFA5eg4GKQtzf0",
+          import.meta.env.VITE_TOKEN_API 
+          
       },
       body: JSON.stringify(body),
     });

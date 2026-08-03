@@ -126,4 +126,16 @@ export type Sala = {
   dscSala: string;
   dscObservacao: string;
   dscAndar: string;
+  codSetor: number;
+  Setor: Setor;
+};
+
+export type Setor = {
+  codSetor: number;
+  codLocal: number;
+  dscSetor: string;
+  nomUsuario: string | null;
+  datCadastro: string | null;
+  datUltimaAlteracao: string | null;
+  corLinha: string;
 };
