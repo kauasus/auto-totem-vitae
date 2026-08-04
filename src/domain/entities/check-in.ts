@@ -6,6 +6,7 @@ export type AddressData = {
   bairro: string;
   cidade: string;
   uf: string;
+  codMunicipio?: number;
 };
 
 export type PaymentMethod = "PIX" | "Cartão Crédito" | "Cartão Débito" | "Retorno";

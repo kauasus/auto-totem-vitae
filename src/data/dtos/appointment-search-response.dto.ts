@@ -22,6 +22,8 @@ export type PatientDto = {
   dscEstCivil?: string;
   indBloqueio?: boolean;
   email?: string;
+  dscSexo?: string;
+  indSexo?: string;
   Municipio: MunicipioDto;
 };
 
@@ -51,13 +53,16 @@ export type ProcedimentoDto = {
   nomProcedimento?: string;
   indexame?: number | boolean | string;
   indExame?: number | boolean | string;
-  procedimentoTabela?: Array<{
+  procedimentoTabela?: {
     codEmpresa?: number;
     valProcedimento?: number;
-  }>;
+  };
 };
 
 export type AppointmentSearchResponseDto = {
+  nomPaciente?: string;
+  codCpf?: string;
+  datNascimento?: string;
   codAgenda?: number;
   codMedico?: number;
   codEspecialidade?: number;
@@ -100,6 +105,16 @@ export type AppointmentSearchResponseDto = {
   indExame?: number | boolean | string;
   nomLocal?: string;
   datNasc?: string;
+  dscSexo?: string;
+  abrLogradouro?: string;
+  nomLogradouro?: string;
+  numPredio?: string;
+  dscCmplmntEndrc?: string;
+  nomBairro?: string;
+  codMunicipio?: number;
+  dscMunicipio?: string;
+  sigUnidadeFederacao?: string;
+  codEndrcmntPstl?: string;
   numCaixa?: number;
   numItemCaixa?: number;
   Paciente?: PatientDto;

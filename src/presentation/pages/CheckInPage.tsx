@@ -16,6 +16,7 @@ import { makePrintAppointment } from "../../main/factories/make-print-appointmen
 import { makeRunLog } from "../../main/factories/make-register-log";
 import { makeUpdatePatientRegistration } from "../../main/factories/make-update-patient-registration";
 import { makeIssueServiceInvoice } from "../../main/factories/make-issue-service-invoice";
+import { makeCreatePatient } from "../../main/factories/make-create-patient";
 import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 type Step = "cpf" | "payment" | "success";
@@ -26,6 +27,7 @@ const printAppointment = makePrintAppointment();
 const runLog = makeRunLog();
 const updatePatientRegistration = makeUpdatePatientRegistration();
 const issueServiceInvoice = makeIssueServiceInvoice();
+const createPatient = makeCreatePatient();
 
 const CheckInPage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -80,37 +82,73 @@ const CheckInPage: React.FC = () => {
       throw new Error("Forma de pagamento inválida.");
     }
 
+    let patientForAttendance = patient;
+    let appointmentForAttendance = appointment;
+    let patientWasCreated = false;
+
+    const existingPatientCode = patient.codPaciente ?? appointment.codPaciente;
+
+    if (!existingPatientCode) {
+      const codPaciente = await createPatient.execute({
+        patient,
+        appointment,
+      });
+
+      patientForAttendance = { ...patient, codPaciente };
+      appointmentForAttendance = {
+        ...appointment,
+        codPaciente,
+        nomPaciente: patientForAttendance.nomeCompleto,
+      };
+      patientWasCreated = true;
+      setPatient(patientForAttendance);
+      setAppointment(appointmentForAttendance);
+    } else {
+      patientForAttendance = { ...patient, codPaciente: existingPatientCode };
+      appointmentForAttendance = {
+        ...appointment,
+        codPaciente: existingPatientCode,
+      };
+    }
+
     const codAtendimento = await createAttendance.execute({
-      patient,
-      appointment,
+      patient: patientForAttendance,
+      appointment: appointmentForAttendance,
       paymentMethod: method,
     });
 
     const appointmentWithAttendance = {
-      ...appointment,
+      ...appointmentForAttendance,
       codAtendimento,
     };
 
     setAppointment(appointmentWithAttendance);
 
-    if (registrationChanged) {
+    if (registrationChanged && !patientWasCreated) {
       await updatePatientRegistration.execute({
-        patient,
+        patient: patientForAttendance,
         appointment: appointmentWithAttendance,
       });
     }
 
     if (!appointmentWithAttendance.indRetorno) {
       await issueServiceInvoice.execute({
-        patient,
+        patient: patientForAttendance,
         appointment: appointmentWithAttendance,
       });
     }
 
-    await printAppointment.execute({
-      patient,
-      appointment: appointmentWithAttendance,
-    });
+    try {
+      await printAppointment.execute({
+        patient: patientForAttendance,
+        appointment: appointmentWithAttendance,
+      });
+    } catch (printError) {
+      console.error(
+        "Não foi possível imprimir o comprovante. O atendimento já foi concluído.",
+        printError,
+      );
+    }
 
     setStep("success");
     setTimeout(() => {
@@ -214,6 +252,24 @@ const CheckInPage: React.FC = () => {
                           setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, telefone } : current,
+                          );
+                        }}
+                        onBirthDateChange={(dataNascimento) => {
+                          setRegistrationChanged(true);
+                          setPatient((current) =>
+                            current ? { ...current, dataNascimento } : current,
+                          );
+                        }}
+                        onNameChange={(nomeCompleto) => {
+                          setRegistrationChanged(true);
+                          setPatient((current) =>
+                            current ? { ...current, nomeCompleto } : current,
+                          );
+                        }}
+                        onSexChange={(sexo) => {
+                          setRegistrationChanged(true);
+                          setPatient((current) =>
+                            current ? { ...current, sexo } : current,
                           );
                         }}
                       />

@@ -12,7 +12,7 @@ interface AddressFormProps {
   onNext: () => void;
 }
 
-type AddressField = keyof AddressData;
+type AddressField = Exclude<keyof AddressData, 'codMunicipio'>;
 
 const emptyAddress: AddressData = {
   cep: '',
@@ -43,7 +43,7 @@ const fieldConfig: Record<
   },
   numero: {
     label: 'Número',
-    placeholder: '123',
+    placeholder: '',
     keyboardKind: 'numeric',
     maxLength: 6,
   },
@@ -121,6 +121,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
         bairro: data.bairro || baseAddress.bairro,
         cidade: data.localidade || baseAddress.cidade,
         uf: data.uf || baseAddress.uf,
+        codMunicipio: Number(data.ibge) || baseAddress.codMunicipio,
         numero: baseAddress.numero,
         complemento: baseAddress.complemento ?? '',
       };
@@ -146,6 +147,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
     address.bairro.trim().length > 0 &&
     address.cidade.trim().length > 0 &&
     address.uf.trim().length > 0 &&
+    typeof address.codMunicipio === 'number' &&
     !loadingCep;
 
   const openField = (field: AddressField) => {

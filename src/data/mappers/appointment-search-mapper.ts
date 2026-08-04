@@ -21,38 +21,68 @@ const pickDisplayCpf = (cpfInput: string) => {
 };
 
 const pickCpf = (response: AppointmentSearchResponseDto) =>
-  response.Paciente?.codCpf ?? "";
+  response.Paciente?.codCpf ?? response.codCpf ?? "";
 
 const pickPatientName = (response: AppointmentSearchResponseDto) =>
   response.Paciente?.nomPaciente ||
+  response.nomPaciente ||
   response.nomSolicitante ||
   response.nomUsuario ||
   "";
 
 const pickBirthDate = (response: AppointmentSearchResponseDto) =>
-  response.Paciente?.datNascimento || response.datNasc || "";
+  response.Paciente?.datNascimento ||
+  response.datNascimento ||
+  response.datNasc ||
+  "";
+
+const pickPatientSex = (response: AppointmentSearchResponseDto) => {
+  const value = (
+    response.Paciente?.dscSexo ||
+    response.Paciente?.indSexo ||
+    response.dscSexo ||
+    ""
+  ).trim();
+
+  if (/^f(?:eminino)?$/i.test(value)) return "Feminino";
+  if (/^m(?:asculino)?$/i.test(value)) return "Masculino";
+  return value;
+};
 
 const pickAddress = (response: AppointmentSearchResponseDto) => {
   const patient = response.Paciente;
 
   return {
-    cep: asString(patient?.codEndrcmntPstl),
-    logradouro: [patient?.abrLogradouro, patient?.nomLogradouro]
+    cep: asString(patient?.codEndrcmntPstl ?? response.codEndrcmntPstl),
+    logradouro: [
+      patient?.abrLogradouro ?? response.abrLogradouro,
+      patient?.nomLogradouro ?? response.nomLogradouro,
+    ]
       .filter(Boolean)
       .join(" ")
       .trim(),
-    numero: asString(patient?.numPredio),
-    complemento: asString(patient?.dscCmplmntEndrc),
-    bairro: asString(patient?.nomBairro),
-    cidade: asString(patient?.Municipio.dscMunicipio),
-    municipio: asString(patient?.Municipio.dscMunicipio),
-    uf: asString(patient?.sigUnidadeFederacao),
+    numero: asString(patient?.numPredio ?? response.numPredio),
+    complemento: asString(
+      patient?.dscCmplmntEndrc ?? response.dscCmplmntEndrc,
+    ),
+    bairro: asString(patient?.nomBairro ?? response.nomBairro),
+    cidade: asString(
+      patient?.Municipio?.dscMunicipio ?? response.dscMunicipio,
+    ),
+    municipio: asString(
+      patient?.Municipio?.dscMunicipio ?? response.dscMunicipio,
+    ),
+    uf: asString(
+      patient?.sigUnidadeFederacao ?? response.sigUnidadeFederacao,
+    ),
+    codMunicipio:
+      patient?.Municipio?.codMunicipio ?? response.codMunicipio,
   };
 };
 
 const pickAppointmentValue = (response: AppointmentSearchResponseDto) => {
   const tableValue =
-    response.Procedimento?.procedimentoTabela?.[0]?.valProcedimento;
+    response.Procedimento?.procedimentoTabela?.valProcedimento;
 
   return typeof tableValue === "number" ? tableValue : undefined;
 };
@@ -95,6 +125,7 @@ const mapPatient = (
   ),
   email: response.Paciente?.email ?? "",
   dataNascimento: formatApiDate(pickBirthDate(response)),
+  sexo: pickPatientSex(response),
   address: pickAddress(response),
 });
 

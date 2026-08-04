@@ -1,10 +1,10 @@
 import React from "react";
-import { Keyboard } from "lucide-react";
+import { AlertCircle, Keyboard } from "lucide-react";
 import AddressForm from "./AddressForm";
 import FieldKeyboardModal from "./FieldKeyboardModal";
 import type { AddressData, Appointment, PatientData } from "../types";
 import type { PaymentMethod } from "../domain/entities/check-in";
-import { formatPhone, onlyDigits } from "../utils/validation";
+import { formatPhone, isValidCep, onlyDigits } from "../utils/validation";
 
 interface PaymentProps {
   patient: PatientData;
@@ -13,7 +13,47 @@ interface PaymentProps {
   onConfirm: (method: PaymentMethod) => Promise<void>;
   onAddressChange: (address: AddressData) => void;
   onPhoneChange: (telefone: string) => void;
+  onBirthDateChange: (dataNascimento: string) => void;
+  onNameChange: (nomeCompleto: string) => void;
+  onSexChange: (sexo: string) => void;
 }
+
+const formatBirthDate = (value: string) => {
+  const digits = onlyDigits(value).slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+};
+
+const isValidBirthDate = (value?: string) => {
+  const match = value?.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return false;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  return (
+    year >= 1900 &&
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day &&
+    date <= new Date()
+  );
+};
+
+const isAddressComplete = (address?: AddressData) =>
+  Boolean(
+    address &&
+      isValidCep(address.cep) &&
+      address.logradouro.trim() &&
+      address.numero.trim() &&
+      address.bairro.trim() &&
+      address.cidade.trim() &&
+      address.uf.trim().length === 2 &&
+      typeof address.codMunicipio === "number",
+  );
 
 const priceLabel = (v?: number) =>
   typeof v === "number"
@@ -53,11 +93,12 @@ const EditableField: React.FC<{
   value?: string;
   placeholder: string;
   onClick: () => void;
-}> = ({ label, value, placeholder, onClick }) => (
+  invalid?: boolean;
+}> = ({ label, value, placeholder, onClick, invalid = false }) => (
   <button
     type="button"
     onClick={onClick}
-    className="rounded-xl border border-gray-100 bg-white px-4 py-3 text-left transition hover:border-[#b91c1c] hover:shadow-sm active:scale-[0.99]"
+    className={`rounded-xl border bg-white px-4 py-3 text-left transition hover:border-[#b91c1c] hover:shadow-sm active:scale-[0.99] ${invalid ? "border-red-400" : "border-gray-100"}`}
   >
     <div className="flex items-center gap-2 text-[11px] uppercase font-bold tracking-widest text-gray-400">
       <span>{label}</span>
@@ -98,15 +139,45 @@ const Payment: React.FC<PaymentProps> = ({
   onConfirm,
   onAddressChange,
   onPhoneChange,
+  onBirthDateChange,
+  onNameChange,
+  onSexChange,
 }) => {
   const [method, setMethod] = React.useState<PaymentMethod>("Retorno");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isAddressOpen, setIsAddressOpen] = React.useState(false);
   const [isPhoneOpen, setIsPhoneOpen] = React.useState(false);
+  const [isBirthDateOpen, setIsBirthDateOpen] = React.useState(false);
+  const [isNameOpen, setIsNameOpen] = React.useState(false);
+
+  const isNewPatient = !patient.codPaciente && !appointment.codPaciente;
+  const phoneDigits = onlyDigits(patient.telefone || patient.telefone2 || "");
+  const personalDataChecks = {
+    nome: patient.nomeCompleto.trim().length > 0,
+    nascimento: isValidBirthDate(patient.dataNascimento),
+    telefone: phoneDigits.length === 10 || phoneDigits.length === 11,
+    sexo: Boolean(patient.sexo?.trim()),
+    endereco: isAddressComplete(patient.address),
+  };
+  const missingPersonalData = [
+    !personalDataChecks.nome && "nome",
+    !personalDataChecks.nascimento && "data de nascimento",
+    !personalDataChecks.telefone && "telefone",
+    !personalDataChecks.sexo && "sexo",
+    !personalDataChecks.endereco && "endereço completo",
+  ].filter(Boolean) as string[];
+  const canCompleteReception =
+    !isNewPatient || missingPersonalData.length === 0;
 
   const handleConfirm = async () => {
     if (!method) return;
+    if (!canCompleteReception) {
+      setError(
+        `Preencha os dados pessoais obrigatórios: ${missingPersonalData.join(", ")}.`,
+      );
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
 
@@ -138,17 +209,64 @@ const Payment: React.FC<PaymentProps> = ({
       <div className="p-4 md:p-5 lg:p-6 space-y-4 md:space-y-5 lg:space-y-6 flex-1 min-h-0 overflow-y-auto">
         <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
           <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
-            Dados Pessoais
+            {isNewPatient ? "Complete seu cadastro" : "Dados Pessoais"}
           </h4>
+          {isNewPatient && (
+            <p className="text-sm font-medium text-gray-600">
+              Como este é seu primeiro atendimento, confira e complete os dados obrigatórios abaixo.
+            </p>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            <Field label="Nome" value={patient.nomeCompleto} />
-            <Field label="Nascimento" value={patient.dataNascimento} />
+            {isNewPatient ? (
+              <>
+                <EditableField
+                  label="Nome"
+                  value={patient.nomeCompleto}
+                  placeholder="Digite seu nome completo"
+                  invalid={!personalDataChecks.nome}
+                  onClick={() => setIsNameOpen(true)}
+                />
+                <Field label="CPF" value={patient.cpf} />
+                <EditableField
+                  label="Nascimento"
+                  value={patient.dataNascimento}
+                  placeholder="DD/MM/AAAA"
+                  invalid={!personalDataChecks.nascimento}
+                  onClick={() => setIsBirthDateOpen(true)}
+                />
+              </>
+            ) : (
+              <>
+                <Field label="Nome" value={patient.nomeCompleto} />
+                <Field label="Nascimento" value={patient.dataNascimento} />
+              </>
+            )}
             <EditableField
               label="Telefone"
               value={patient.telefone || patient.telefone2}
               placeholder="Digite o telefone"
+              invalid={isNewPatient && !personalDataChecks.telefone}
               onClick={() => setIsPhoneOpen(true)}
             />
+            {isNewPatient && (
+              <div className={`rounded-xl border bg-white px-4 py-3 ${personalDataChecks.sexo ? "border-gray-100" : "border-red-400"}`}>
+                <div className="text-[11px] uppercase font-bold tracking-widest text-gray-400">
+                  Sexo
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {["Feminino", "Masculino"].map((sexo) => (
+                    <button
+                      key={sexo}
+                      type="button"
+                      onClick={() => onSexChange(sexo)}
+                      className={`rounded-lg border px-3 py-2 text-sm font-bold transition ${patient.sexo === sexo ? "border-[#a31515] bg-[#fff1f1] text-[#a31515]" : "border-gray-200 text-gray-600 hover:border-[#d9a5a5]"}`}
+                    >
+                      {sexo}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="rounded-xl border border-gray-100 bg-white px-4 py-3 col-span-1 md:col-span-3">
               <div className="text-[11px] uppercase font-bold tracking-widest text-gray-400">
                 Endereço
@@ -159,12 +277,20 @@ const Payment: React.FC<PaymentProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAddressOpen(true)}
-                className="mt-3 rounded-lg border border-[#a31515] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#a31515] hover:bg-[#fef2f2]"
+                className={`mt-3 rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-wide hover:bg-[#fef2f2] ${!isNewPatient || personalDataChecks.endereco ? "border-[#a31515] text-[#a31515]" : "border-red-500 bg-red-50 text-red-600"}`}
               >
                 Editar endereço
               </button>
             </div>
           </div>
+          {isNewPatient && !canCompleteReception && (
+            <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                Para concluir a recepção, preencha: {missingPersonalData.join(", ")}.
+              </span>
+            </div>
+          )}
           {/* <p className="text-sm text-gray-500">
             Nota fiscal: notafiscal@vitaecenter.com.br
           </p> */}
@@ -262,11 +388,14 @@ const Payment: React.FC<PaymentProps> = ({
         <button
           onClick={() => void handleConfirm()}
           disabled={
-            isSubmitting || (method === "Retorno" && !appointment?.indRetorno)
+            isSubmitting ||
+            !canCompleteReception ||
+            (method === "Retorno" && !appointment?.indRetorno)
           }
           className={[
             "px-10 py-4 rounded-xl font-bold text-xl transition-all",
             isSubmitting ||
+            !canCompleteReception ||
             (method === "Retorno" && !appointment?.indRetorno) ||
             (!method && !appointment?.indRetorno)
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -280,6 +409,39 @@ const Payment: React.FC<PaymentProps> = ({
               : "Concluir Pagamento"}
         </button>
       </footer>
+
+      <FieldKeyboardModal
+        key={`name-${patient.nomeCompleto}`}
+        open={isNameOpen}
+        title="Nome completo"
+        subtitle="Digite seu nome completo."
+        value={patient.nomeCompleto}
+        keyboardKind="text"
+        placeholder="Nome completo"
+        maxLength={100}
+        onClose={() => setIsNameOpen(false)}
+        onConfirm={(nextValue) => {
+          onNameChange(nextValue.trim().replace(/\s+/g, " ").toUpperCase());
+          setIsNameOpen(false);
+        }}
+      />
+
+      <FieldKeyboardModal
+        key={`birth-date-${patient.dataNascimento ?? ""}`}
+        open={isBirthDateOpen}
+        title="Data de nascimento"
+        subtitle="Digite a data no formato DD/MM/AAAA."
+        value={onlyDigits(patient.dataNascimento ?? "")}
+        keyboardKind="numeric"
+        placeholder="DD/MM/AAAA"
+        maxLength={8}
+        previewFormatter={formatBirthDate}
+        onClose={() => setIsBirthDateOpen(false)}
+        onConfirm={(nextValue) => {
+          onBirthDateChange(formatBirthDate(nextValue));
+          setIsBirthDateOpen(false);
+        }}
+      />
 
       <FieldKeyboardModal
         key={`phone-${patient.telefone ?? patient.telefone2 ?? ""}`}

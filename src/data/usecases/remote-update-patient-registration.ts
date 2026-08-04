@@ -8,6 +8,7 @@ import { onlyDigits } from "../../utils/validation";
 
 export type UpdatePatientRegistrationRequest = {
   codPaciente: number;
+  datNascimento: string;
   numTelefone: string;
   nomLogradouro: string;
   numPredio: string;
@@ -46,6 +47,11 @@ const normalizeAddress = (address?: AddressData): AddressData => ({
   uf: address?.uf ?? "",
 });
 
+const toApiDate = (value?: string) => {
+  const match = value?.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : value?.trim() ?? "";
+};
+
 export class RemoteUpdatePatientRegistration
   implements UpdatePatientRegistrationUseCase
 {
@@ -75,6 +81,7 @@ export class RemoteUpdatePatientRegistration
         patient.codPaciente ?? appointment.codPaciente,
         "codPaciente",
       ),
+      datNascimento: toApiDate(patient.dataNascimento),
       numTelefone: onlyDigits(patient.telefone ?? patient.telefone2 ?? ""),
       nomLogradouro: address.logradouro.trim(),
       numPredio: address.numero.trim(),

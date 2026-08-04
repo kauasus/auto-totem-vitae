@@ -113,7 +113,10 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
         appointment.horInicio ?? appointment.horario,
         "horInicio",
       ),
-      codPaciente: requireNumber(appointment.codPaciente, "codPaciente"),
+      codPaciente: requireNumber(
+        appointment.codPaciente ?? patient.codPaciente,
+        "codPaciente",
+      ),
       indRetorno: Boolean(appointment.indRetorno),
       nomUsuario: requireString(getAttendanceUserName(), "nomUsuario"),
       codTipoGuia: appointment.codTipoGuia ?? env.attendanceCodTipoGuia,
