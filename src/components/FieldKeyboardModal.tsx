@@ -58,19 +58,19 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[1150] flex items-center justify-center bg-black/45 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-1150 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="w-full max-w-4xl overflow-hidden rounded-[2rem] border border-white/40 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)]"
+            className="w-full max-w-4xl overflow-hidden rounded-4xl border border-white/40 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)]"
             initial={{ y: 30, scale: 0.96, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 20, scale: 0.98, opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <div className="bg-gradient-to-r from-[#b91c1c] to-[#8b1212] px-6 py-5 text-white">
+            <div className="bg-linear-to-r from-[#b91c1c] to-[#8b1212] px-6 py-5 text-white">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.3em] text-white/80">Editar campo</p>

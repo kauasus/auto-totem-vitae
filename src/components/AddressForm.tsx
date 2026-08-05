@@ -389,7 +389,7 @@ const FieldButton: React.FC<FieldButtonProps> = ({ label, value, placeholder, on
           <label className="text-[11px] uppercase font-black tracking-[0.25em] text-gray-400">{label}</label>
           <Keyboard className="h-3.5 w-3.5 text-gray-300" />
         </div>
-        <div className="mt-2 min-h-[1.75rem] text-lg font-semibold text-gray-800 break-words">
+        <div className="mt-2 min-h-7 text-lg font-semibold text-gray-800 wrap-break-word">
           {value || <span className="text-gray-400">{placeholder}</span>}
         </div>
       </div>
