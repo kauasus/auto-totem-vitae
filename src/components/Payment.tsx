@@ -222,7 +222,7 @@ const Payment: React.FC<PaymentProps> = ({
                 <EditableField
                   label="Nome"
                   value={patient.nomeCompleto}
-                  placeholder="Digite seu nome completo"
+                  placeholder=""
                   invalid={!personalDataChecks.nome}
                   onClick={() => setIsNameOpen(true)}
                 />
@@ -230,7 +230,7 @@ const Payment: React.FC<PaymentProps> = ({
                 <EditableField
                   label="Nascimento"
                   value={patient.dataNascimento}
-                  placeholder="DD/MM/AAAA"
+                  placeholder=""
                   invalid={!personalDataChecks.nascimento}
                   onClick={() => setIsBirthDateOpen(true)}
                 />
@@ -244,7 +244,7 @@ const Payment: React.FC<PaymentProps> = ({
             <EditableField
               label="Telefone"
               value={patient.telefone || patient.telefone2}
-              placeholder="Digite o telefone"
+              placeholder=""
               invalid={isNewPatient && !personalDataChecks.telefone}
               onClick={() => setIsPhoneOpen(true)}
             />
@@ -417,7 +417,7 @@ const Payment: React.FC<PaymentProps> = ({
         subtitle="Digite seu nome completo."
         value={patient.nomeCompleto}
         keyboardKind="text"
-        placeholder="Nome completo"
+        placeholder=""
         maxLength={100}
         onClose={() => setIsNameOpen(false)}
         onConfirm={(nextValue) => {
@@ -433,7 +433,7 @@ const Payment: React.FC<PaymentProps> = ({
         subtitle="Digite a data no formato DD/MM/AAAA."
         value={onlyDigits(patient.dataNascimento ?? "")}
         keyboardKind="numeric"
-        placeholder="DD/MM/AAAA"
+        placeholder=""
         maxLength={8}
         previewFormatter={formatBirthDate}
         onClose={() => setIsBirthDateOpen(false)}
@@ -450,7 +450,7 @@ const Payment: React.FC<PaymentProps> = ({
         subtitle="Digite o telefone com DDD."
         value={onlyDigits(patient.telefone || patient.telefone2 || "")}
         keyboardKind="numeric"
-        placeholder="11999999999"
+        placeholder=""
         maxLength={11}
         previewFormatter={formatPhone}
         onClose={() => setIsPhoneOpen(false)}

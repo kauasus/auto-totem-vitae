@@ -30,14 +30,14 @@ const fieldConfig: Record<
 > = {
   cep: {
     label: 'CEP',
-    placeholder: '00000-000',
+    placeholder: '',
     keyboardKind: 'numeric',
     maxLength: 8,
     preview: (v) => formatCep(v),
   },
   logradouro: {
     label: 'Logradouro',
-    placeholder: 'Rua, avenida, praça...',
+    placeholder: '',
     keyboardKind: 'text',
     maxLength: 60,
   },
@@ -49,25 +49,25 @@ const fieldConfig: Record<
   },
   complemento: {
     label: 'Complemento',
-    placeholder: 'Apto, bloco...',
+    placeholder: '',
     keyboardKind: 'text',
     maxLength: 40,
   },
   bairro: {
     label: 'Bairro',
-    placeholder: 'Bairro',
+    placeholder: '',
     keyboardKind: 'text',
     maxLength: 40,
   },
   cidade: {
     label: 'Cidade',
-    placeholder: 'Cidade',
+    placeholder: '',
     keyboardKind: 'text',
     maxLength: 40,
   },
   uf: {
     label: 'UF',
-    placeholder: 'MG',
+    placeholder: '',
     keyboardKind: 'text',
     maxLength: 2,
   },

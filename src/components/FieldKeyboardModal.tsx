@@ -26,7 +26,7 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
   subtitle,
   value,
   keyboardKind,
-  placeholder = 'Digite aqui',
+  placeholder = '',
   maxLength,
   previewFormatter,
   onClose,

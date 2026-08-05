@@ -115,7 +115,7 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           readOnly
           className="w-full text-3xl md:text-4xl p-5 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#b91c1c] focus:ring-2 focus:ring-[#fceaea] outline-none transition duration-150 mb-3"
           aria-label="Campo CPF"
-          placeholder="000.000.000-00"
+          placeholder=""
           maxLength={14}
           disabled={isSubmitting}
         />
