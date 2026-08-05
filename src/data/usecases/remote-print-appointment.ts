@@ -68,9 +68,9 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
 
     const payload: PrintAppointmentRequest = {
       codAtendimento: appointment.codAtendimento,
-      paciente: patient.nomeCompleto,
+      paciente: `${patient.nomeCompleto} - ${appointment.convenio}`,
       medico: `${appointment.indSexoMedico === "Feminino" ? "DRA." : "DR."} ${appointment.medico}`,
-      procedimento: appointment.procedimento,
+      procedimento: `${appointment.procedimento} ${appointment.indRetorno ? "(Retorno)" : ""}`,
       sala: appointment.numSala.toString(),
       corLinha: appointment.corLinha,
       andar: appointment.andar,
