@@ -5,6 +5,7 @@ import { env } from "../../main/config/env";
 import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 export type CreateAttendanceRequest = {
+  codEmpresa: number;
   codAgenda: number;
   numSala: number;
   codMedico: number;
@@ -93,6 +94,7 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
     }
 
     const payload: CreateAttendanceRequest = {
+      codEmpresa: requireNumber(1, "codEmpresa"),
       codAgenda: requireNumber(appointment.codAgenda, "codAgenda"),
       numSala: requireNumber(appointment.numSala, "numSala"),
       codMedico: requireNumber(appointment.codMedico, "codMedico"),
