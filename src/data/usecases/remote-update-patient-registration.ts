@@ -4,7 +4,7 @@ import type {
   PatientData,
 } from "../../domain/entities/check-in";
 import type { HttpClient } from "../../infra/http/fetch-http-client";
-import { onlyDigits } from "../../utils/validation";
+import { isValidCep, onlyDigits } from "../../utils/validation";
 
 export type UpdatePatientRegistrationRequest = {
   codPaciente: number;
@@ -35,6 +35,15 @@ const requireNumber = (
   }
 
   return value;
+};
+
+const requireString = (value: string | undefined, fieldName: string) => {
+  const normalized = value?.trim() ?? "";
+  if (!normalized) {
+    throw new Error(`Campo obrigatorio ausente para atualizar cadastro: ${fieldName}.`);
+  }
+
+  return normalized;
 };
 
 const normalizeAddress = (address?: AddressData): AddressData => ({
@@ -75,6 +84,16 @@ export class RemoteUpdatePatientRegistration
     }
 
     const address = normalizeAddress(patient.address);
+    const cep = onlyDigits(address.cep);
+    const uf = requireString(address.uf, "sigUnidadeFederacao").toUpperCase();
+
+    if (!isValidCep(cep)) {
+      throw new Error("CEP invalido para atualizar cadastro.");
+    }
+
+    if (uf.length !== 2) {
+      throw new Error("UF invalida para atualizar cadastro.");
+    }
 
     const payload: UpdatePatientRegistrationRequest = {
       codPaciente: requireNumber(
@@ -83,13 +102,13 @@ export class RemoteUpdatePatientRegistration
       ),
       datNascimento: toApiDate(patient.dataNascimento),
       numTelefone: onlyDigits(patient.telefone ?? patient.telefone2 ?? ""),
-      nomLogradouro: address.logradouro.trim(),
-      numPredio: address.numero.trim(),
+      nomLogradouro: requireString(address.logradouro, "nomLogradouro"),
+      numPredio: requireString(address.numero, "numPredio"),
       dscCmplmntEndrc: (address.complemento ?? "").trim(),
-      nomBairro: address.bairro.trim(),
-      dscMunicipio: address.cidade.trim(),
-      sigUnidadeFederacao: address.uf.trim().toUpperCase(),
-      codEndrcmntPstl: onlyDigits(address.cep),
+      nomBairro: requireString(address.bairro, "nomBairro"),
+      dscMunicipio: requireString(address.cidade, "dscMunicipio"),
+      sigUnidadeFederacao: uf,
+      codEndrcmntPstl: cep,
     };
 
     await this.httpClient.put<unknown>(resolvedEndpoint, payload);

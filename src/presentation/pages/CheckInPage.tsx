@@ -64,7 +64,6 @@ const CheckInPage: React.FC = () => {
   const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState("");
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
-  const [registrationChanged, setRegistrationChanged] = useState(false);
 
   const handleStart = () => setShowSplash(false);
 
@@ -72,7 +71,6 @@ const CheckInPage: React.FC = () => {
     setPatient(null);
     setAppointment(null);
     setCpfOnlyNumbers("");
-    setRegistrationChanged(false);
     setStep("cpf");
   };
 
@@ -112,8 +110,6 @@ const CheckInPage: React.FC = () => {
 
     let patientForAttendance = patient;
     let appointmentForAttendance = appointment;
-    let patientWasCreated = false;
-
     const existingPatientCode = patient.codPaciente ?? appointment.codPaciente;
 
     if (!existingPatientCode) {
@@ -128,7 +124,6 @@ const CheckInPage: React.FC = () => {
         codPaciente,
         nomPaciente: patientForAttendance.nomeCompleto,
       };
-      patientWasCreated = true;
       setPatient(patientForAttendance);
       setAppointment(appointmentForAttendance);
     } else {
@@ -138,6 +133,11 @@ const CheckInPage: React.FC = () => {
         codPaciente: existingPatientCode,
       };
     }
+
+    await updatePatientRegistration.execute({
+      patient: patientForAttendance,
+      appointment: appointmentForAttendance,
+    });
 
     const codAtendimento = await createAttendance.execute({
       patient: patientForAttendance,
@@ -151,13 +151,6 @@ const CheckInPage: React.FC = () => {
     };
 
     setAppointment(appointmentWithAttendance);
-
-    if (registrationChanged && !patientWasCreated) {
-      await updatePatientRegistration.execute({
-        patient: patientForAttendance,
-        appointment: appointmentWithAttendance,
-      });
-    }
 
     const shouldIssueInvoice =
       !appointmentWithAttendance.indRetorno &&
@@ -275,31 +268,26 @@ const CheckInPage: React.FC = () => {
                         onBack={handleRestart}
                         onConfirm={handleFinalize}
                         onAddressChange={(address) => {
-                          setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, address } : current,
                           );
                         }}
                         onPhoneChange={(telefone) => {
-                          setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, telefone } : current,
                           );
                         }}
                         onBirthDateChange={(dataNascimento) => {
-                          setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, dataNascimento } : current,
                           );
                         }}
                         onNameChange={(nomeCompleto) => {
-                          setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, nomeCompleto } : current,
                           );
                         }}
                         onSexChange={(sexo) => {
-                          setRegistrationChanged(true);
                           setPatient((current) =>
                             current ? { ...current, sexo } : current,
                           );

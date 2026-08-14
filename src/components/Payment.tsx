@@ -52,7 +52,9 @@ const isAddressComplete = (address?: AddressData) =>
       address.bairro.trim() &&
       address.cidade.trim() &&
       address.uf.trim().length === 2 &&
-      typeof address.codMunicipio === "number",
+      typeof address.codMunicipio === "number" &&
+      Number.isFinite(address.codMunicipio) &&
+      address.codMunicipio > 0,
   );
 
 const priceLabel = (v?: number) =>
@@ -167,14 +169,18 @@ const Payment: React.FC<PaymentProps> = ({
     !personalDataChecks.sexo && "sexo",
     !personalDataChecks.endereco && "endereço completo",
   ].filter(Boolean) as string[];
-  const canCompleteReception =
-    !isNewPatient || missingPersonalData.length === 0;
+  const requiredMissingData = isNewPatient
+    ? missingPersonalData
+    : personalDataChecks.endereco
+      ? []
+      : ["endereço completo"];
+  const canCompleteReception = requiredMissingData.length === 0;
 
   const handleConfirm = async () => {
     if (!method) return;
     if (!canCompleteReception) {
       setError(
-        `Preencha os dados pessoais obrigatórios: ${missingPersonalData.join(", ")}.`,
+        `Preencha os dados obrigatórios: ${requiredMissingData.join(", ")}.`,
       );
       return;
     }
@@ -277,17 +283,17 @@ const Payment: React.FC<PaymentProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAddressOpen(true)}
-                className={`mt-3 rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-wide hover:bg-[#fef2f2] ${!isNewPatient || personalDataChecks.endereco ? "border-[#a31515] text-[#a31515]" : "border-red-500 bg-red-50 text-red-600"}`}
+                className={`mt-3 rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-wide hover:bg-[#fef2f2] ${personalDataChecks.endereco ? "border-[#a31515] text-[#a31515]" : "border-red-500 bg-red-50 text-red-600"}`}
               >
                 Editar endereço
               </button>
             </div>
           </div>
-          {isNewPatient && !canCompleteReception && (
+          {!canCompleteReception && (
             <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                Para concluir a recepção, preencha: {missingPersonalData.join(", ")}.
+                Para concluir a recepção, preencha: {requiredMissingData.join(", ")}.
               </span>
             </div>
           )}

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import NumericKeyboard from "./NumericKeyboard";
+import { isValidCpf } from "../utils/validation";
 
 interface CpfInputProps {
   cpf: string; // só números
@@ -37,8 +38,8 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
 
   const handleSubmit = async () => {
     const nums = onlyNumbers(local);
-    if (nums.length !== 11) {
-      triggerError("Digite um CPF com 11 dígitos.");
+    if (!isValidCpf(nums)) {
+      triggerError("Digite um CPF válido.");
       return;
     }
 
@@ -121,7 +122,7 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
         />
 
         <p className="text-sm text-gray-400 mb-5">
-          Apenas números. Ex.: 12345678900
+          Apenas números.
         </p>
 
         {error && <div className="text-base text-red-600 mb-3">{error}</div>}

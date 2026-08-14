@@ -3,8 +3,7 @@ import type {
   Appointment,
   PatientData,
 } from "../../domain/entities/check-in";
-import { normalizeCpf } from "../../validation";
-import { onlyDigits } from "../../utils/validation";
+import { isValidCep, isValidCpf, normalizeCpf, onlyDigits } from "../../validation";
 import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 export type CreatePatientRequest = {
@@ -53,7 +52,7 @@ const requireString = (value: string | undefined, fieldName: string) => {
 };
 
 const requireNumber = (value: number | undefined, fieldName: string) => {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     throw new Error(`Campo obrigatório ausente para cadastrar paciente: ${fieldName}.`);
   }
   return value;
@@ -91,9 +90,25 @@ export class RemoteCreatePatient implements CreatePatientUseCase {
 
     const { patient, appointment } = input;
     const address = patient.address;
+    const cpf = normalizeCpf(patient.cpf);
+    const cep = onlyDigits(address?.cep ?? "");
+    const uf = requireString(address?.uf, "sigUnidadeFederacao").toUpperCase();
+
+    if (!isValidCpf(cpf)) {
+      throw new Error("CPF inválido para cadastrar paciente.");
+    }
+
+    if (!isValidCep(cep)) {
+      throw new Error("CEP inválido para cadastrar paciente.");
+    }
+
+    if (uf.length !== 2) {
+      throw new Error("UF inválida para cadastrar paciente.");
+    }
+
     const payload: CreatePatientRequest = {
       nomPaciente: requireString(patient.nomeCompleto, "nomPaciente"),
-      codCpf: requireString(normalizeCpf(patient.cpf), "codCpf"),
+      codCpf: cpf,
       nomUsuario: requireString(
         getAttendanceUserName().toUpperCase(),
         "nomUsuario",
@@ -111,14 +126,8 @@ export class RemoteCreatePatient implements CreatePatientUseCase {
       nomBairro: requireString(address?.bairro, "nomBairro"),
       codMunicipio: requireNumber(address?.codMunicipio, "codMunicipio"),
       dscMunicipio: requireString(address?.cidade, "dscMunicipio"),
-      sigUnidadeFederacao: requireString(
-        address?.uf.toUpperCase(),
-        "sigUnidadeFederacao",
-      ),
-      codEndrcmntPstl: requireString(
-        onlyDigits(address?.cep ?? ""),
-        "codEndrcmntPstl",
-      ),
+      sigUnidadeFederacao: uf,
+      codEndrcmntPstl: cep,
     };
 
     try {

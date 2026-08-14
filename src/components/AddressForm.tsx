@@ -146,8 +146,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
     address.numero.trim().length > 0 &&
     address.bairro.trim().length > 0 &&
     address.cidade.trim().length > 0 &&
-    address.uf.trim().length > 0 &&
+    address.uf.trim().length === 2 &&
     typeof address.codMunicipio === 'number' &&
+    Number.isFinite(address.codMunicipio) &&
+    address.codMunicipio > 0 &&
     !loadingCep;
 
   const openField = (field: AddressField) => {

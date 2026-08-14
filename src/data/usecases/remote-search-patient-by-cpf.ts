@@ -39,7 +39,7 @@ export class RemoteSearchPatientByCpf implements SearchPatientByCpfUseCase {
     if (!isValidCpf(cpf)) {
       return {
         found: false,
-        message: "Digite um CPF válido com 11 dígitos.",
+        message: "Digite um CPF válido.",
       };
     }
 

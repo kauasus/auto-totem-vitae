@@ -28,7 +28,28 @@ export const formatCpf = (value: string) => {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
 };
 
-export const isValidCpf = (value: string) => normalizeCpf(value).length === 11;
+export const isValidCpf = (value: string) => {
+  const cpf = normalizeCpf(value);
+
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  const calculateDigit = (length: number) => {
+    const sum = cpf
+      .slice(0, length)
+      .split("")
+      .reduce(
+        (total, digit, index) => total + Number(digit) * (length + 1 - index),
+        0,
+      );
+    const remainder = (sum * 10) % 11;
+    return remainder === 10 ? 0 : remainder;
+  };
+
+  return (
+    calculateDigit(9) === Number(cpf[9]) &&
+    calculateDigit(10) === Number(cpf[10])
+  );
+};
 
 export const formatApiTime = (value: string) => {
   const digits = String(value ?? "").trim();

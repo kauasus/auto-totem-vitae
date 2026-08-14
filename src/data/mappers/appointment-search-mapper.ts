@@ -9,6 +9,7 @@ import {
   formatApiTime,
   formatCpf,
   formatPhone,
+  isValidCpf,
   normalizeCpf,
 } from "../../validation";
 
@@ -20,8 +21,13 @@ const pickDisplayCpf = (cpfInput: string) => {
   return cpf ? formatCpf(cpf) : cpfInput;
 };
 
-const pickCpf = (response: AppointmentSearchResponseDto) =>
-  response.Paciente?.codCpf ?? response.codCpf ?? "";
+const pickCpf = (response: AppointmentSearchResponseDto, cpfInput: string) => {
+  const responseCpf = String(
+    response.Paciente?.codCpf ?? response.codCpf ?? "",
+  );
+
+  return isValidCpf(responseCpf) ? responseCpf : cpfInput;
+};
 
 const pickPatientName = (response: AppointmentSearchResponseDto) =>
   response.Paciente?.nomPaciente ||
@@ -116,7 +122,7 @@ const mapPatient = (
 ): PatientData => ({
   codPaciente: response.codPaciente ?? response.Paciente?.codPaciente,
   nomeCompleto: pickPatientName(response),
-  cpf: pickDisplayCpf(pickCpf(response) || cpfInput),
+  cpf: pickDisplayCpf(pickCpf(response, cpfInput)),
   telefone: formatPhone(
     response.Paciente?.numTelefone ?? response.numTelefone ?? "",
   ),
