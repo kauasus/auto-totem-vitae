@@ -4,10 +4,16 @@ import type {
   PatientData,
 } from "../../domain/entities/check-in";
 import type { HttpClient } from "../../infra/http/fetch-http-client";
-import { isValidCep, onlyDigits } from "../../utils/validation";
+import {
+  isValidCep,
+  isValidCpf,
+  normalizeCpf,
+  onlyDigits,
+} from "../../utils/validation";
 
 export type UpdatePatientRegistrationRequest = {
   codPaciente: number;
+  cpf: string;
   datNascimento: string;
   numTelefone: string;
   nomLogradouro: string;
@@ -84,8 +90,13 @@ export class RemoteUpdatePatientRegistration
     }
 
     const address = normalizeAddress(patient.address);
+    const cpf = normalizeCpf(patient.cpf);
     const cep = onlyDigits(address.cep);
     const uf = requireString(address.uf, "sigUnidadeFederacao").toUpperCase();
+
+    if (!isValidCpf(cpf)) {
+      throw new Error("CPF invalido para atualizar cadastro.");
+    }
 
     if (!isValidCep(cep)) {
       throw new Error("CEP invalido para atualizar cadastro.");
@@ -100,6 +111,7 @@ export class RemoteUpdatePatientRegistration
         patient.codPaciente ?? appointment.codPaciente,
         "codPaciente",
       ),
+      cpf,
       datNascimento: toApiDate(patient.dataNascimento),
       numTelefone: onlyDigits(patient.telefone ?? patient.telefone2 ?? ""),
       nomLogradouro: requireString(address.logradouro, "nomLogradouro"),
