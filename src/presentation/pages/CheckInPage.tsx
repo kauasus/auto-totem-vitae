@@ -235,7 +235,7 @@ const CheckInPage: React.FC = () => {
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="w-[96vw] max-w-[1080px] h-[96vh]"
+            className="w-[96vw] max-w-270 h-[96vh]"
           >
             <div className="rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 h-full flex flex-col">
               <div className="bg-linear-to-r from-[#b42222] to-[#8b1212] text-white p-6 md:p-7 lg:p-8">

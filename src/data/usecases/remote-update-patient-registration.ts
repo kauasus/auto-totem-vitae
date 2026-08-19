@@ -13,7 +13,7 @@ import {
 
 export type UpdatePatientRegistrationRequest = {
   codPaciente: number;
-  cpf: string;
+  codCpf: string;
   datNascimento: string;
   numTelefone: string;
   nomLogradouro: string;
@@ -111,7 +111,7 @@ export class RemoteUpdatePatientRegistration
         patient.codPaciente ?? appointment.codPaciente,
         "codPaciente",
       ),
-      cpf,
+      codCpf: cpf,
       datNascimento: toApiDate(patient.dataNascimento),
       numTelefone: onlyDigits(patient.telefone ?? patient.telefone2 ?? ""),
       nomLogradouro: requireString(address.logradouro, "nomLogradouro"),
