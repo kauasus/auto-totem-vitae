@@ -22,6 +22,10 @@ export type CreateAttendanceRequest = {
   nomPaciente: string;
   nomProcedimento: string;
   valProcedimento: number;
+  pagamento: {
+    dscEspecie: string;
+    valLancamento: number;
+  }[];
 };
 
 export type CreateAttendanceResponse =
@@ -93,6 +97,12 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
       throw new Error("Defina a URL da API de atendimento em `VITE_CREATE_ATENDIMENTO_URL`.");
     }
 
+    const dscEspecie = requireString(paymentMethod, "dscEspecie");
+    const valProcedimento = requireNumber(
+      appointment.valProcedimento,
+      "valProcedimento",
+    );
+
     const payload: CreateAttendanceRequest = {
       codEmpresa: requireNumber(1, "codEmpresa"),
       codAgenda: requireNumber(appointment.codAgenda, "codAgenda"),
@@ -122,7 +132,7 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
       indRetorno: Boolean(appointment.indRetorno),
       nomUsuario: requireString(getAttendanceUserName(), "nomUsuario"),
       codTipoGuia: appointment.codTipoGuia ?? env.attendanceCodTipoGuia,
-      dscEspecie: requireString(paymentMethod, "dscEspecie"),
+      dscEspecie,
       nomPaciente: requireString(
         appointment.nomPaciente ?? patient.nomeCompleto,
         "nomPaciente",
@@ -131,10 +141,8 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
         appointment.nomProcedimento ?? appointment.procedimento,
         "nomProcedimento",
       ),
-      valProcedimento: requireNumber(
-        appointment.valProcedimento,
-        "valProcedimento",
-      ),
+      valProcedimento,
+      pagamento: [{ dscEspecie, valLancamento: valProcedimento }],
     };
 
     const response = await this.httpClient.post<CreateAttendanceResponse>(
