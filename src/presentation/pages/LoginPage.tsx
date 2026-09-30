@@ -53,7 +53,7 @@ export default function LoginPage({ expired, onLogin }: {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-red-50 via-white to-gray-50 flex items-center justify-center px-6 py-12">
+    <main className="min-h-screen bg-linear-to-b from-red-50 via-white to-gray-50 flex items-center justify-center px-6 py-12">
       <section className="w-full max-w-lg rounded-3xl bg-white border border-gray-100 p-8 sm:p-12 shadow-xl">
         <VitaeLogo width="100%" height={120} />
         <div className="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-700">
