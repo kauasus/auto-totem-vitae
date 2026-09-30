@@ -1,5 +1,4 @@
 const ATTENDANCE_USER_STORAGE_KEY = "auto_totem_attendance_nom_usuario";
-const DEFAULT_ATTENDANCE_USER = import.meta.env.VITE_ATENDIMENTO_NOM_USUARIO
 
 export const getAttendanceUserName = () => {
   const storedValue = localStorage.getItem(ATTENDANCE_USER_STORAGE_KEY)?.trim();
@@ -8,8 +7,7 @@ export const getAttendanceUserName = () => {
     return storedValue;
   }
 
-  localStorage.setItem(ATTENDANCE_USER_STORAGE_KEY, DEFAULT_ATTENDANCE_USER);
-  return DEFAULT_ATTENDANCE_USER;
+  return "";
 };
 
 export const setAttendanceUserName = (userName: string) => {
@@ -17,7 +15,7 @@ export const setAttendanceUserName = (userName: string) => {
 
   localStorage.setItem(
     ATTENDANCE_USER_STORAGE_KEY,
-    normalized || DEFAULT_ATTENDANCE_USER,
+    normalized,
   );
 };
 

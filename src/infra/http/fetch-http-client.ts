@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { getApiToken } from "../auth/api-token-storage";
 export interface HttpClient {
   post<TResponse>(url: string, body: unknown): Promise<TResponse>;
   put<TResponse>(url: string, body: unknown): Promise<TResponse>;
@@ -6,6 +6,7 @@ export interface HttpClient {
 
 type FetchHttpClientOptions = {
   getAuthToken?: () => string;
+  onUnauthorized?: () => void;
 };
 
 const readResponseError = async (response: Response) => {
@@ -35,7 +36,7 @@ const readResponseError = async (response: Response) => {
 };
 
 export const createFetchHttpClient = (
-  _options: FetchHttpClientOptions = {},
+  options: FetchHttpClientOptions = {},
 ): HttpClient => ({
   async put<TResponse>(url: string, body: unknown): Promise<TResponse> {
     const response = await fetch(url, {
@@ -44,12 +45,13 @@ export const createFetchHttpClient = (
         "Content-Type": "application/json",
         Accept: "application/json",
         "x-access-token":
-          import.meta.env.VITE_TOKEN_API 
+          (options.getAuthToken ?? getApiToken)(),
       },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
+      if (response.status === 401) options.onUnauthorized?.();
       const detail = await readResponseError(response);
       throw new Error(
         detail || `A requisiÃ§Ã£o falhou com status ${response.status}.`,
@@ -72,13 +74,14 @@ export const createFetchHttpClient = (
         "Content-Type": "application/json",
         Accept: "application/json",
         "x-access-token":
-          import.meta.env.VITE_TOKEN_API 
+          (options.getAuthToken ?? getApiToken)(),
           
       },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
+      if (response.status === 401) options.onUnauthorized?.();
       const detail = await readResponseError(response);
       throw new Error(
         detail || `A requisição falhou com status ${response.status}.`,
