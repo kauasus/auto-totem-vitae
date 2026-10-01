@@ -6,11 +6,17 @@ import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage"
 
 export type CreateAttendanceRequest = {
   codEmpresa: number;
+  codTipoAtendimento: number;
   codAgenda: number;
   numSala: number;
   codMedico: number;
   codEspecialidade: number;
-  codProcedimento: number;
+  procedimentos: {
+    codProcedimento: number;
+    nomProcedimento: string;
+    valProcedimento: number;
+    numQtde: number;
+  }[];
   codConvenio: number;
   datAtendimento: Date;
   horInicio: string;
@@ -20,8 +26,6 @@ export type CreateAttendanceRequest = {
   codTipoGuia: number;
   dscEspecie: string;
   nomPaciente: string;
-  nomProcedimento: string;
-  valProcedimento: number;
   pagamento: {
     dscEspecie: string;
     valLancamento: number;
@@ -105,6 +109,7 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
 
     const payload: CreateAttendanceRequest = {
       codEmpresa: requireNumber(1, "codEmpresa"),
+      codTipoAtendimento: 4,
       codAgenda: requireNumber(appointment.codAgenda, "codAgenda"),
       numSala: requireNumber(appointment.numSala, "numSala"),
       codMedico: requireNumber(appointment.codMedico, "codMedico"),
@@ -112,10 +117,15 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
         appointment.codEspecialidade,
         "codEspecialidade",
       ),
-      codProcedimento: requireNumber(
-        appointment.codProcedimento,
-        "codProcedimento",
-      ),
+      procedimentos: [{
+        codProcedimento: requireNumber(appointment.codProcedimento, "codProcedimento"),
+        nomProcedimento: requireString(
+          appointment.nomProcedimento ?? appointment.procedimento,
+          "nomProcedimento",
+        ),
+        valProcedimento,
+        numQtde: 1,
+      }],
       codConvenio: requireNumber(
         appointment.codConvenio,
         "codConvenio",
@@ -137,11 +147,6 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
         appointment.nomPaciente ?? patient.nomeCompleto,
         "nomPaciente",
       ),
-      nomProcedimento: requireString(
-        appointment.nomProcedimento ?? appointment.procedimento,
-        "nomProcedimento",
-      ),
-      valProcedimento,
       pagamento: [{ dscEspecie, valLancamento: valProcedimento }],
     };
 
