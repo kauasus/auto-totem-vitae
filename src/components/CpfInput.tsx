@@ -110,16 +110,15 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           Digite seu CPF
         </h2>
 
-        <input
-          type="text"
-          value={formatCPF(local)}
-          readOnly
-          className="w-full text-3xl md:text-4xl p-5 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#b91c1c] focus:ring-2 focus:ring-[#fceaea] outline-none transition duration-150 mb-3"
-          aria-label="Campo CPF"
-          placeholder=""
-          maxLength={14}
-          disabled={isSubmitting}
-        />
+        <span
+          className="flex items-center w-full max-w-80 h-11 text-2xl px-3 mb-3"
+          role="status"
+          aria-label="CPF digitado"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {formatCPF(local)}
+        </span>
 
         <p className="text-sm text-gray-400 mb-5">
           Apenas números.
