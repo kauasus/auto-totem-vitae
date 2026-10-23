@@ -1,4 +1,5 @@
 import { env } from "../../main/config/env";
+import { createPrinterFetchHttpClient } from "../http/printer-fetch-http-client";
 import type { PaymentMethod } from "../../domain/entities/check-in";
 
 export interface PaymentStatus {
@@ -75,9 +76,20 @@ export async function paymentRequest(path: string, body?: object): Promise<Payme
   let data: PaymentStatus;
   try { data = text ? JSON.parse(text) : {}; }
   catch { data = { message: text }; }
+  // /print também responde com 0 em caso de sucesso.
+  if (path === "/print" && response.ok && (data as unknown) === 0) return {};
   if (!data || typeof data !== "object") throw new Error("Resposta inválida do serviço de pagamento.");
   if (!response.ok) throw new Error(data.message || `Erro no serviço de pagamento (${response.status}).`);
   return data;
+}
+
+export async function printPaymentReceipt(receipt: string): Promise<void> {
+  const result = await createPrinterFetchHttpClient().post<{ success?: boolean; error?: string }>(
+    env.paymentReceiptPrintApiUrl, { text: receipt },
+  );
+  if (!result || result.success !== true) {
+    throw new Error(result?.error || "A API de impressão não confirmou o envio do comprovante do pagamento.");
+  }
 }
 
 export function buildPaymentPayload(method: PaymentMethod, value?: number) {

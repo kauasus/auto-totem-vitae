@@ -62,7 +62,7 @@ export class RemotePrintAppointment implements PrintAppointmentUseCase {
       throw new Error("Defina a URL da impressora em `VITE_PRINT_API_URL`.");
     }
 
-    if (!appointment.codAtendimento) {
+    if (typeof appointment.codAtendimento !== "number" || !Number.isSafeInteger(appointment.codAtendimento) || appointment.codAtendimento <= 0) {
       throw new Error("Não foi possível imprimir: codAtendimento ausente.");
     }
 

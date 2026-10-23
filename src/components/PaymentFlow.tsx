@@ -6,12 +6,13 @@ import {
 
 interface Props {
   payload: { amount: number; paymentMethod: number; installments: number };
-  onApproved: () => void;
+  onApproved: (status: PaymentStatus) => void;
   onClose: () => void;
 }
 
 export default function PaymentFlow({ payload, onApproved, onClose }: Props) {
   const started = useRef(false);
+  const approvalHandled = useRef(false);
   const [status, setStatus] = useState<PaymentStatus>({ message: "Enviando pagamento à maquininha..." });
   const [accepted, setAccepted] = useState(false);
   const [serviceBusy, setServiceBusy] = useState(false);
@@ -22,12 +23,18 @@ export default function PaymentFlow({ payload, onApproved, onClose }: Props) {
   const terminal = isPaymentFinished(status);
   const outcome = getPaymentOutcome(status);
   const finalMessages: Record<string, string> = {
-    APPROVED: "Pagamento aprovado. Você pode concluir a recepção.",
+    APPROVED: "Pagamento aprovado. Preparando a impressão e a recepção...",
     CANCELED: "Pagamento cancelado. Você pode tentar novamente.",
     CANCELLED: "Pagamento cancelado. Você pode tentar novamente.",
     REJECTED: "Pagamento recusado. Você pode tentar novamente com outro cartão ou forma de pagamento.",
     REFUNDED: "Pagamento estornado. Você pode tentar novamente.",
   };
+
+  useEffect(() => {
+    if (serviceBusy || !terminal || outcome !== "APPROVED" || approvalHandled.current) return;
+    approvalHandled.current = true;
+    onApproved(status);
+  }, [serviceBusy, terminal, outcome, onApproved, status]);
 
   useEffect(() => {
     if (started.current) return;
@@ -147,8 +154,6 @@ export default function PaymentFlow({ payload, onApproved, onClose }: Props) {
             <button disabled={actionBusy} className={buttonClass} onClick={() => void action("/confirm-no")}>Não</button>
           </>}
           {!polling && !terminal && accepted && <button className={buttonClass} onClick={() => setPolling(true)}>Consultar novamente</button>}
-          {!serviceBusy && terminal && status.transaction?.receipt && <button disabled={actionBusy} className={buttonClass} onClick={() => void action("/print", { text: status.transaction!.receipt })}>Imprimir comprovante</button>}
-          {!serviceBusy && terminal && outcome === "APPROVED" && <button disabled={actionBusy} className={`${buttonClass} bg-[#a31515] text-white`} onClick={onApproved}>Concluir recepção</button>}
           {safeToClose && <button disabled={actionBusy} className={buttonClass} onClick={onClose}>Voltar ao pagamento</button>}
         </div>
       </div>

@@ -72,12 +72,12 @@ const requireString = (
   return normalized;
 };
 
-const pickResponseCodAtendimento = (response: CreateAttendanceResponse) => {
+const pickResponseCodAtendimento = (response: CreateAttendanceResponse | null) => {
   if (typeof response === "number") {
     return response;
   }
 
-  return response.codAtendimento ?? response.CodAtendimento ?? response.cod_atendimento;
+  return response?.codAtendimento ?? response?.CodAtendimento ?? response?.cod_atendimento;
 };
 
 export class RemoteCreateAttendance implements CreateAttendanceUseCase {
@@ -157,8 +157,8 @@ export class RemoteCreateAttendance implements CreateAttendanceUseCase {
 
     const codAtendimento = pickResponseCodAtendimento(response);
 
-    if (typeof codAtendimento !== "number" || Number.isNaN(codAtendimento)) {
-      throw new Error("A API de atendimento não retornou `codAtendimento`.");
+    if (typeof codAtendimento !== "number" || !Number.isSafeInteger(codAtendimento) || codAtendimento <= 0) {
+      throw new Error("A API de atendimento não retornou um codAtendimento válido (inteiro maior que zero). Não foi possível confirmar a recepção.");
     }
 
     return codAtendimento;

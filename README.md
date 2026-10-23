@@ -79,7 +79,23 @@ com valor em centavos, débito = 0, crédito = 1, PIX = 2 e uma parcela.
 O acompanhamento consulta `GET /status` a cada 800 ms, sem consultas sobrepostas.
 A tela oferece cancelamento, confirmação de cancelamento, código PIX copia e cola
 (equivalente ao exemplo) e impressão de comprovante conforme a resposta do serviço.
-Após `APPROVED`, o cliente pode imprimir e tocar em **Concluir recepção**.
+Após `APPROVED` (direto ou em `transaction.status` quando o fluxo retorna
+`FINISHED`), o totem envia automaticamente o comprovante do pagamento para
+`POST /api-py/v1/print-payment` da API Python como JSON (`{ "text": "..." }`),
+cadastra a recepção e envia o comprovante dela
+para a API de impressão. Não é necessário confirmar impressão ou conclusão.
+A nota fiscal é solicitada depois da impressão da recepção, para que uma falha
+fiscal não impeça o envio do comprovante à impressora.
+Falhas de impressão ou de recepção aparecem na tela e permitem retomar sem
+cobrar novamente; as etapas confirmadas não se repetem na mesma sessão.
+Os dois documentos usam a impressora padrão do Windows, em trabalhos separados,
+sem diálogo do navegador. A rota de pagamento é configurável por
+`VITE_PAYMENT_RECEIPT_PRINT_URL`; por padrão deriva de `VITE_PRINT_API_URL`,
+trocando `/print` por `/print-payment`. Atualize também o `app.py` de
+`impressao-totem-py` para disponibilizar essa rota.
+Quando a padrão usa o driver Microsoft Print To PDF, os arquivos são salvos
+automaticamente em `%USERPROFILE%/Vitae/Comprovantes`, sem a janela Salvar como.
+O diretório pode ser alterado por `VITAE_RECEIPTS_DIR` na API Python.
 Retornos concluem a recepção sem enviar cobrança.
 
 Configure no `.env` e reinicie/recompile o aplicativo:

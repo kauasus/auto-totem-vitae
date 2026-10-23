@@ -2,7 +2,7 @@ import React from "react";
 import { AlertCircle, Keyboard } from "lucide-react";
 import AddressForm from "./AddressForm";
 import PaymentFlow from "./PaymentFlow";
-import { buildPaymentPayload } from "../infra/payment/payment-service";
+import { buildPaymentPayload, printPaymentReceipt } from "../infra/payment/payment-service";
 import FieldKeyboardModal from "./FieldKeyboardModal";
 import type { AddressData, Appointment, PatientData } from "../types";
 import type { PaymentMethod } from "../domain/entities/check-in";
@@ -151,6 +151,8 @@ const Payment: React.FC<PaymentProps> = ({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const submitting = React.useRef(false);
   const [paymentApproved, setPaymentApproved] = React.useState(false);
+  const paymentReceipt = React.useRef("");
+  const paymentReceiptPrinted = React.useRef(false);
   const [paymentPayload, setPaymentPayload] = React.useState<ReturnType<typeof buildPaymentPayload> | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isAddressOpen, setIsAddressOpen] = React.useState(false);
@@ -203,6 +205,17 @@ const Payment: React.FC<PaymentProps> = ({
     setError(null);
 
     try {
+      if (!appointment.indRetorno && !paymentReceiptPrinted.current) {
+        if (!paymentReceipt.current) {
+          throw new Error("Pagamento aprovado, mas o serviço não forneceu o comprovante. Solicite ajuda à recepção. Não repita a cobrança.");
+        }
+        try {
+          await printPaymentReceipt(paymentReceipt.current);
+          paymentReceiptPrinted.current = true;
+        } catch (cause) {
+          throw new Error(`Pagamento aprovado. Falha ao imprimir o comprovante do pagamento: ${cause instanceof Error ? cause.message : "Verifique a impressora."}`);
+        }
+      }
       await onConfirm(appointment.indRetorno ? "Retorno" : method);
     } catch (confirmError) {
       setError(
@@ -232,7 +245,8 @@ const Payment: React.FC<PaymentProps> = ({
       {paymentPayload && <PaymentFlow
         payload={paymentPayload}
         onClose={() => setPaymentPayload(null)}
-        onApproved={() => {
+        onApproved={(status) => {
+          paymentReceipt.current = status.transaction?.receipt || "";
           setPaymentApproved(true);
           setPaymentPayload(null);
           void handleConfirm(true);

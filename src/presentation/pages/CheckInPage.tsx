@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CpfInput from "../../components/CpfInput";
 import Payment from "../../components/Payment";
@@ -64,10 +64,14 @@ const CheckInPage: React.FC = () => {
   const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState("");
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const printedAttendances = useRef(new Set<number>());
+  const invoicedAttendances = useRef(new Set<number>());
 
   const handleStart = () => setShowSplash(false);
 
   const handleRestart = () => {
+    printedAttendances.current.clear();
+    invoicedAttendances.current.clear();
     setPatient(null);
     setAppointment(null);
     setCpfOnlyNumbers("");
@@ -94,7 +98,6 @@ const CheckInPage: React.FC = () => {
   };
 
   const handleFinalize = async (method: PaymentMethod) => {
-    console.log(method);
     if (!patient || !appointment) {
       throw new Error("Dados insuficientes para imprimir.");
     }
@@ -134,12 +137,22 @@ const CheckInPage: React.FC = () => {
       };
     }
 
-    await updatePatientRegistration.execute({
-      patient: patientForAttendance,
-      appointment: appointmentForAttendance,
-    });
+    const existingAttendanceCode = appointmentForAttendance.codAtendimento;
+    const hasExistingAttendance = typeof existingAttendanceCode === "number" &&
+      Number.isSafeInteger(existingAttendanceCode) && existingAttendanceCode > 0;
 
-    const codAtendimento = appointmentForAttendance.codAtendimento ?? await createAttendance.execute({
+    if (!hasExistingAttendance) {
+      try {
+        await updatePatientRegistration.execute({
+          patient: patientForAttendance,
+          appointment: appointmentForAttendance,
+        });
+      } catch (cause) {
+        throw new Error(`Não foi possível atualizar o cadastro para recepcionar: ${cause instanceof Error ? cause.message : "Falha na API."}`);
+      }
+    }
+
+    const codAtendimento = hasExistingAttendance ? existingAttendanceCode : await createAttendance.execute({
       patient: patientForAttendance,
       appointment: appointmentForAttendance,
       paymentMethod: method,
@@ -156,23 +169,28 @@ const CheckInPage: React.FC = () => {
       !appointmentWithAttendance.indRetorno &&
       isPatientAdult(patientForAttendance.dataNascimento);
 
-    if (shouldIssueInvoice) {
-      await issueServiceInvoice.execute({
-        patient: patientForAttendance,
-        appointment: appointmentWithAttendance,
-      });
+    if (!printedAttendances.current.has(codAtendimento)) {
+      try {
+        await printAppointment.execute({
+          patient: patientForAttendance,
+          appointment: appointmentWithAttendance,
+        });
+        printedAttendances.current.add(codAtendimento);
+      } catch (cause) {
+        throw new Error(`Recepção ${codAtendimento} já registrada, mas não foi possível imprimir o comprovante da recepção: ${cause instanceof Error ? cause.message : "Verifique a impressora."} Tente concluir novamente sem repetir o pagamento.`);
+      }
     }
 
-    try {
-      await printAppointment.execute({
-        patient: patientForAttendance,
-        appointment: appointmentWithAttendance,
-      });
-    } catch (printError) {
-      console.error(
-        "Não foi possível imprimir o comprovante. O atendimento já foi concluído.",
-        printError,
-      );
+    if (shouldIssueInvoice && !invoicedAttendances.current.has(codAtendimento)) {
+      try {
+        await issueServiceInvoice.execute({
+          patient: patientForAttendance,
+          appointment: appointmentWithAttendance,
+        });
+        invoicedAttendances.current.add(codAtendimento);
+      } catch (cause) {
+        throw new Error(`Recepção ${codAtendimento} registrada e comprovante enviado à impressora. Falha na nota fiscal: ${cause instanceof Error ? cause.message : "Falha na API."} Tente concluir novamente sem repetir o pagamento.`);
+      }
     }
 
     setStep("success");

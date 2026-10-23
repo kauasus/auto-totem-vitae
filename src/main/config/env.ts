@@ -24,6 +24,10 @@ export const env = {
   printApiUrl:
     import.meta.env.VITE_PRINT_API_URL?.trim() ??
     "http://localhost:5501/api-py/v1/print",
+  paymentReceiptPrintApiUrl:
+    import.meta.env.VITE_PAYMENT_RECEIPT_PRINT_URL?.trim() ||
+    (import.meta.env.VITE_PRINT_API_URL?.trim() || "http://localhost:5501/api-py/v1/print")
+      .replace(/\/print\/?$/, "/print-payment"),
   attendanceCodTipoGuia:
     Number(import.meta.env.VITE_ATENDIMENTO_COD_TIPO_GUIA?.trim()) || 1,
 };
