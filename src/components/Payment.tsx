@@ -1,6 +1,8 @@
 import React from "react";
 import { AlertCircle, Keyboard } from "lucide-react";
 import AddressForm from "./AddressForm";
+import PaymentFlow from "./PaymentFlow";
+import { buildPaymentPayload } from "../infra/payment/payment-service";
 import FieldKeyboardModal from "./FieldKeyboardModal";
 import type { AddressData, Appointment, PatientData } from "../types";
 import type { PaymentMethod } from "../domain/entities/check-in";
@@ -147,6 +149,9 @@ const Payment: React.FC<PaymentProps> = ({
 }) => {
   const [method, setMethod] = React.useState<PaymentMethod>("Retorno");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const submitting = React.useRef(false);
+  const [paymentApproved, setPaymentApproved] = React.useState(false);
+  const [paymentPayload, setPaymentPayload] = React.useState<ReturnType<typeof buildPaymentPayload> | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isAddressOpen, setIsAddressOpen] = React.useState(false);
   const [isPhoneOpen, setIsPhoneOpen] = React.useState(false);
@@ -176,25 +181,37 @@ const Payment: React.FC<PaymentProps> = ({
       : ["endereço completo"];
   const canCompleteReception = requiredMissingData.length === 0;
 
-  const handleConfirm = async () => {
-    if (!method) return;
+  const handleConfirm = async (approved = paymentApproved) => {
+    if (!method || submitting.current) return;
     if (!canCompleteReception) {
       setError(
         `Preencha os dados obrigatórios: ${requiredMissingData.join(", ")}.`,
       );
       return;
     }
+    if (!appointment.indRetorno && !approved) {
+      try {
+        setError(null);
+        setPaymentPayload(buildPaymentPayload(method, appointment.valor ?? appointment.valProcedimento));
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : "Valor inválido.");
+      }
+      return;
+    }
+    submitting.current = true;
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await onConfirm(method);
+      await onConfirm(appointment.indRetorno ? "Retorno" : method);
     } catch (confirmError) {
       setError(
         confirmError instanceof Error
           ? confirmError.message
           : "Não foi possível concluir o pagamento agora.",
       );
+    } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   };
@@ -212,6 +229,16 @@ const Payment: React.FC<PaymentProps> = ({
 
   return (
     <div className="animate-fade-slide-up h-full flex flex-col">
+      {paymentPayload && <PaymentFlow
+        payload={paymentPayload}
+        onClose={() => setPaymentPayload(null)}
+        onApproved={() => {
+          setPaymentApproved(true);
+          setPaymentPayload(null);
+          void handleConfirm(true);
+        }}
+      />}
+      {paymentApproved && <p className="rounded-xl bg-green-50 p-4 font-bold text-green-800">Pagamento aprovado. Se necessário, tente novamente concluir a recepção sem nova cobrança.</p>}
       <div className="p-4 md:p-5 lg:p-6 space-y-4 md:space-y-5 lg:space-y-6 flex-1 min-h-0 overflow-y-auto">
         <section className="rounded-2xl border border-gray-100 bg-gray-50 p-4 md:p-5 space-y-3">
           <h4 className="text-base md:text-lg font-black uppercase tracking-widest text-[#a31515]">
@@ -341,6 +368,7 @@ const Payment: React.FC<PaymentProps> = ({
                   <button
                     key={option.value}
                     type="button"
+                    disabled={paymentApproved || isSubmitting}
                     onClick={() => setMethod(option.value)}
                     className={[
                       "rounded-xl border px-4 py-4 text-left transition-all",
@@ -386,6 +414,7 @@ const Payment: React.FC<PaymentProps> = ({
 
       <footer className="flex items-center justify-between px-4 py-4 md:px-6 md:py-5 border-t border-gray-100 bg-white">
         <button
+          disabled={isSubmitting || paymentApproved}
           onClick={onBack}
           className="text-gray-700 font-semibold text-xl px-6 py-3 rounded-xl hover:bg-gray-50 transition"
         >
@@ -412,7 +441,7 @@ const Payment: React.FC<PaymentProps> = ({
             ? "Confirmando..."
             : appointment.indRetorno
               ? "Concluir Recepção"
-              : "Concluir Pagamento"}
+              : paymentApproved ? "Concluir Recepção" : "Concluir Pagamento"}
         </button>
       </footer>
 

@@ -139,7 +139,7 @@ const CheckInPage: React.FC = () => {
       appointment: appointmentForAttendance,
     });
 
-    const codAtendimento = await createAttendance.execute({
+    const codAtendimento = appointmentForAttendance.codAtendimento ?? await createAttendance.execute({
       patient: patientForAttendance,
       appointment: appointmentForAttendance,
       paymentMethod: method,

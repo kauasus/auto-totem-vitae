@@ -71,3 +71,38 @@ export default defineConfig([
   },
 ])
 ```
+
+## Integração com a maquininha
+
+O botão **Concluir Pagamento** envia `POST /payment` ao PlimpagKioskService,
+com valor em centavos, débito = 0, crédito = 1, PIX = 2 e uma parcela.
+O acompanhamento consulta `GET /status` a cada 800 ms, sem consultas sobrepostas.
+A tela oferece cancelamento, confirmação de cancelamento, código PIX copia e cola
+(equivalente ao exemplo) e impressão de comprovante conforme a resposta do serviço.
+Após `APPROVED`, o cliente pode imprimir e tocar em **Concluir recepção**.
+Retornos concluem a recepção sem enviar cobrança.
+
+Configure no `.env` e reinicie/recompile o aplicativo:
+
+```dotenv
+VITE_PAYMENT_SERVICE_URL=https://127.0.0.1
+```
+
+O endereço padrão é o mesmo do exemplo. O serviço precisa estar instalado,
+com a ROOT CA confiável no Windows (`instala_certificado.bat`).
+A aplicação envia `POST /activate` ao abrir, com os parâmetros
+`VITE_PAYMENT_SITEF_IP`, `VITE_PAYMENT_STORE_ID`, `VITE_PAYMENT_TERMINAL_ID`,
+`VITE_PAYMENT_SHOP_CNPJ`, `VITE_PAYMENT_DEV_CNPJ`,
+`VITE_PAYMENT_CONFIGURATION_PARAMETERS`, `VITE_PAYMENT_ADDITIONAL_PARAMETERS`
+e `VITE_PAYMENT_PINPAD_MESSAGE` do `.env`. IDs e CNPJs são enviados como
+texto, preservando zeros iniciais. O pagamento aguarda a ativação.
+Em caso de falha, um aviso permite tentar ativar novamente.
+O serviço também precisa permitir a origem do totem via CORS.
+
+Falhas na consulta permitem consultar novamente sem reenviar a cobrança.
+Quando não é possível confirmar se o envio inicial chegou ao serviço, ou quando
+há aprovação com erro, a tela pede auxílio à recepção e bloqueia nova cobrança.
+Após aprovação, falhas na conclusão da recepção permitem repetir essa etapa sem
+cobrar novamente. Essa proteção vale para a sessão atual: se o navegador for
+recarregado ou fechado, a recepção deve conferir a transação antes de reiniciar.
+Não há reenvio automático de pagamentos.

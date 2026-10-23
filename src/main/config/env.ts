@@ -1,4 +1,16 @@
 export const env = {
+  paymentServiceUrl:
+    import.meta.env.VITE_PAYMENT_SERVICE_URL?.trim() || "https://127.0.0.1",
+  paymentActivation: {
+    ip: import.meta.env.VITE_PAYMENT_SITEF_IP?.trim() ?? "",
+    storeId: import.meta.env.VITE_PAYMENT_STORE_ID?.trim() ?? "",
+    terminalId: import.meta.env.VITE_PAYMENT_TERMINAL_ID?.trim() ?? "",
+    shopCnpj: import.meta.env.VITE_PAYMENT_SHOP_CNPJ?.trim() ?? "",
+    devCnpj: import.meta.env.VITE_PAYMENT_DEV_CNPJ?.trim() ?? "",
+    configurationParameters: import.meta.env.VITE_PAYMENT_CONFIGURATION_PARAMETERS?.trim() ?? "",
+    additionalParameters: import.meta.env.VITE_PAYMENT_ADDITIONAL_PARAMETERS?.trim() ?? "",
+    pinpadMessage: import.meta.env.VITE_PAYMENT_PINPAD_MESSAGE?.trim() ?? "",
+  },
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL?.trim() ?? "",
   createAttendanceApiUrl:
     import.meta.env.VITE_CREATE_ATENDIMENTO_URL?.trim() ??
