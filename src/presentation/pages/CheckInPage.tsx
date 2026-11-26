@@ -20,9 +20,12 @@ import { makeCreatePatient } from "../../main/factories/make-create-patient";
 import { DUPLICATE_PATIENT_MESSAGE } from "../../data/usecases/remote-create-patient";
 import { makeSearchDuplicatePatients } from "../../main/factories/make-search-duplicate-patients";
 import DuplicatePatientDialog from "../../components/DuplicatePatientDialog";
+import { env } from "../../main/config/env";
 import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 type Step = "cpf" | "payment" | "success";
+
+const initialCpf = env.appEnvironment === "development" ? "10689657625" : "";
 
 const searchPatientByCpf = makeSearchPatientByCpf();
 const createAttendance = makeCreateAttendance();
@@ -65,7 +68,7 @@ const CheckInPage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [step, setStep] = useState<Step>("cpf");
 
-  const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState("");
+  const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState(initialCpf);
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [duplicatePatients, setDuplicatePatients] = useState<PatientData[]>([]);
@@ -80,7 +83,7 @@ const CheckInPage: React.FC = () => {
     setPatient(null);
     setAppointment(null);
     setDuplicatePatients([]);
-    setCpfOnlyNumbers("");
+    setCpfOnlyNumbers(initialCpf);
     setStep("cpf");
   };
 

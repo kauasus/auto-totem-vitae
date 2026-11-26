@@ -1,4 +1,8 @@
 export const env = {
+  appEnvironment:
+    import.meta.env.VITE_APP_ENV?.trim().toLowerCase() === "development"
+      ? "development"
+      : "production",
   paymentIntegrationEnabled:
     import.meta.env.VITE_PAYMENT_INTEGRATION_ENABLED?.trim().toLowerCase() === "true",
   paymentServiceUrl:

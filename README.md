@@ -72,6 +72,19 @@ export default defineConfig([
 ])
 ```
 
+## Ambiente do totem
+
+Defina `VITE_APP_ENV` no `.env`:
+
+```dotenv
+VITE_APP_ENV=production
+```
+
+- `production` inicia a tela com o CPF vazio e solicita que o paciente o digite. É o padrão quando a variável está ausente ou tem um valor desconhecido.
+- `development` preenche o CPF fixo de teste ao iniciar e ao voltar para a tela inicial.
+
+Após alterar a variável, reinicie o servidor de desenvolvimento ou gere um novo build.
+
 ## Integração com a maquininha
 
 Configure a integração no `.env`:
