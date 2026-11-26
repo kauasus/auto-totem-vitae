@@ -1,5 +1,6 @@
 import { getApiToken } from "../auth/api-token-storage";
 export interface HttpClient {
+  get<TResponse>(url: string): Promise<TResponse | null>;
   post<TResponse>(url: string, body: unknown): Promise<TResponse>;
   put<TResponse>(url: string, body: unknown): Promise<TResponse>;
 }
@@ -38,6 +39,23 @@ const readResponseError = async (response: Response) => {
 export const createFetchHttpClient = (
   options: FetchHttpClientOptions = {},
 ): HttpClient => ({
+  async get<TResponse>(url: string): Promise<TResponse | null> {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "x-access-token": (options.getAuthToken ?? getApiToken)(),
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) options.onUnauthorized?.();
+      const detail = await readResponseError(response);
+      throw new Error(detail || `A requisição falhou com status ${response.status}.`);
+    }
+
+    return response.status === 204 ? null : (await response.json()) as TResponse;
+  },
+
   async put<TResponse>(url: string, body: unknown): Promise<TResponse> {
     const response = await fetch(url, {
       method: "PUT",
