@@ -22,6 +22,10 @@ export default function PaymentFlow({ payload, onApproved, onClose }: Props) {
   const [safeToClose, setSafeToClose] = useState(false);
   const terminal = isPaymentFinished(status);
   const outcome = getPaymentOutcome(status);
+  const qrCodeBase64 = status.qrCodeString?.replace(/\s/g, "");
+  const qrCodeImage = qrCodeBase64?.startsWith("data:image/")
+    ? qrCodeBase64
+    : qrCodeBase64 ? `data:image/png;base64,${qrCodeBase64}` : undefined;
   const finalMessages: Record<string, string> = {
     APPROVED: "Pagamento aprovado. Preparando a impressão e a recepção...",
     CANCELED: "Pagamento cancelado. Você pode tentar novamente.",
@@ -129,16 +133,19 @@ export default function PaymentFlow({ payload, onApproved, onClose }: Props) {
   const buttonClass = "rounded-xl border border-gray-300 px-6 py-4 text-lg font-bold disabled:opacity-50";
 
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 p-5" role="dialog" aria-modal="true" aria-labelledby="payment-flow-title">
+    <div className="fixed inset-0 z-1100 flex items-center justify-center bg-black/60 p-5" role="dialog" aria-modal="true" aria-labelledby="payment-flow-title">
       <div className="max-h-[90vh] w-full max-w-2xl space-y-5 overflow-y-auto rounded-2xl bg-white p-8">
         <h2 id="payment-flow-title" className="text-2xl font-bold text-[#a31515]">Pagamento na maquininha</h2>
         {serviceBusy && <p role="alert" className="rounded-xl bg-amber-50 p-4 text-amber-900">O serviço recusou o início desta cobrança porque está ocupado com outra operação, que pode ser a ativação. Nenhum novo pagamento foi iniciado por esta tentativa. Aguarde antes de tentar iniciar novamente. O resultado abaixo pertence à operação anterior; confira qualquer aprovação com a recepção para evitar uma cobrança repetida.</p>}
         <p className="text-xl" aria-live="polite">{serviceBusy ? (terminal ? "A operação anterior terminou. Confira o pagamento anterior antes de iniciar outro." : status.message || "Aguardando o serviço liberar...") : (terminal && finalMessages[outcome || ""]) || status.message || "Siga as instruções da maquininha."}</p>
-        {!serviceBusy && status.showQrCode && status.qrCodeString && (
-          <div className="space-y-3">
-            <p>PIX copia e cola (o QR Code também pode ser exibido na maquininha):</p>
-            <pre className="whitespace-pre-wrap break-all rounded-xl bg-gray-100 p-4">{status.qrCodeString}</pre>
-            <button className={buttonClass} onClick={() => void navigator.clipboard?.writeText(status.qrCodeString!).catch(() => setError("Não foi possível copiar o código PIX."))}>Copiar código PIX</button>
+        {!serviceBusy && status.showQrCode && qrCodeImage && (
+          <div className="space-y-3 text-center">
+            <p>Escaneie o QR Code com o aplicativo do seu banco para pagar com PIX.</p>
+            <img
+              src={qrCodeImage}
+              alt="QR Code para pagamento com PIX"
+              className="mx-auto h-auto w-80 max-w-full rounded-xl bg-white p-4"
+            />
           </div>
         )}
         {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
