@@ -14,6 +14,7 @@ interface PaymentProps {
   appointment: Appointment;
   onBack: () => void;
   onConfirm: (method: PaymentMethod) => Promise<void>;
+  onPreparePatient: () => Promise<boolean>;
   onAddressChange: (address: AddressData) => void;
   onPhoneChange: (telefone: string) => void;
   onBirthDateChange: (dataNascimento: string) => void;
@@ -142,6 +143,7 @@ const Payment: React.FC<PaymentProps> = ({
   appointment,
   onBack,
   onConfirm,
+  onPreparePatient,
   onAddressChange,
   onPhoneChange,
   onBirthDateChange,
@@ -200,7 +202,7 @@ const Payment: React.FC<PaymentProps> = ({
     try {
       if (usesPaymentIntegration && !approved) {
         const payload = buildPaymentPayload(method, appointment.valor ?? appointment.valProcedimento);
-        setPaymentPayload(payload);
+        if (await onPreparePatient()) setPaymentPayload(payload);
         return;
       }
 

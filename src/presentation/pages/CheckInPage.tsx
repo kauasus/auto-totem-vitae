@@ -17,6 +17,9 @@ import { makeRunLog } from "../../main/factories/make-register-log";
 import { makeUpdatePatientRegistration } from "../../main/factories/make-update-patient-registration";
 import { makeIssueServiceInvoice } from "../../main/factories/make-issue-service-invoice";
 import { makeCreatePatient } from "../../main/factories/make-create-patient";
+import { DUPLICATE_PATIENT_MESSAGE } from "../../data/usecases/remote-create-patient";
+import { makeSearchDuplicatePatients } from "../../main/factories/make-search-duplicate-patients";
+import DuplicatePatientDialog from "../../components/DuplicatePatientDialog";
 import { getAttendanceUserName } from "../../infra/auth/attendance-user-storage";
 
 type Step = "cpf" | "payment" | "success";
@@ -28,6 +31,7 @@ const runLog = makeRunLog();
 const updatePatientRegistration = makeUpdatePatientRegistration();
 const issueServiceInvoice = makeIssueServiceInvoice();
 const createPatient = makeCreatePatient();
+const searchDuplicatePatients = makeSearchDuplicatePatients();
 
 const isPatientAdult = (birthDate?: string) => {
   const match = birthDate?.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -64,6 +68,7 @@ const CheckInPage: React.FC = () => {
   const [cpfOnlyNumbers, setCpfOnlyNumbers] = useState("");
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [duplicatePatients, setDuplicatePatients] = useState<PatientData[]>([]);
   const printedAttendances = useRef(new Set<number>());
   const invoicedAttendances = useRef(new Set<number>());
 
@@ -74,6 +79,7 @@ const CheckInPage: React.FC = () => {
     invoicedAttendances.current.clear();
     setPatient(null);
     setAppointment(null);
+    setDuplicatePatients([]);
     setCpfOnlyNumbers("");
     setStep("cpf");
   };
@@ -97,11 +103,56 @@ const CheckInPage: React.FC = () => {
     return res;
   };
 
-  const handleFinalize = async (method: PaymentMethod) => {
+  const preparePatient = async () => {
     if (!patient || !appointment) {
-      throw new Error("Dados insuficientes para imprimir.");
+      throw new Error("Dados insuficientes para recepcionar.");
     }
 
+    const existingCode = patient.codPaciente ?? appointment.codPaciente;
+    if (existingCode) {
+      return {
+        patient: { ...patient, codPaciente: existingCode },
+        appointment: { ...appointment, codPaciente: existingCode },
+      };
+    }
+
+    let codPaciente: number;
+    try {
+      codPaciente = await createPatient.execute({ patient, appointment });
+    } catch (error) {
+      if (!(error instanceof Error) || error.message !== DUPLICATE_PATIENT_MESSAGE) throw error;
+
+      const candidates = await searchDuplicatePatients(patient).catch(() => {
+        throw new Error(
+          "Foi encontrado um cadastro para este CPF, mas não foi possível carregar a lista. Procure o setor de Pós Atendimento.",
+        );
+      });
+      if (!candidates.length) throw error;
+
+      setDuplicatePatients(candidates);
+      return null;
+    }
+
+    const registeredPatient = { ...patient, codPaciente };
+    const registeredAppointment = { ...appointment, codPaciente, nomPaciente: patient.nomeCompleto };
+    setPatient(registeredPatient);
+    setAppointment(registeredAppointment);
+    return { patient: registeredPatient, appointment: registeredAppointment };
+  };
+
+  const selectDuplicatePatient = (selected: PatientData) => {
+    if (!appointment || !selected.codPaciente) return;
+
+    setPatient(selected);
+    setAppointment({
+      ...appointment,
+      codPaciente: selected.codPaciente,
+      nomPaciente: selected.nomeCompleto,
+    });
+    setDuplicatePatients([]);
+  };
+
+  const handleFinalize = async (method: PaymentMethod) => {
     if (
       method !== "PIX" &&
       method !== "Cartão Crédito" &&
@@ -111,31 +162,10 @@ const CheckInPage: React.FC = () => {
       throw new Error("Forma de pagamento inválida.");
     }
 
-    let patientForAttendance = patient;
-    let appointmentForAttendance = appointment;
-    const existingPatientCode = patient.codPaciente ?? appointment.codPaciente;
+    const prepared = await preparePatient();
+    if (!prepared) return;
 
-    if (!existingPatientCode) {
-      const codPaciente = await createPatient.execute({
-        patient,
-        appointment,
-      });
-
-      patientForAttendance = { ...patient, codPaciente };
-      appointmentForAttendance = {
-        ...appointment,
-        codPaciente,
-        nomPaciente: patientForAttendance.nomeCompleto,
-      };
-      setPatient(patientForAttendance);
-      setAppointment(appointmentForAttendance);
-    } else {
-      patientForAttendance = { ...patient, codPaciente: existingPatientCode };
-      appointmentForAttendance = {
-        ...appointment,
-        codPaciente: existingPatientCode,
-      };
-    }
+    const { patient: patientForAttendance, appointment: appointmentForAttendance } = prepared;
 
     const existingAttendanceCode = appointmentForAttendance.codAtendimento;
     const hasExistingAttendance = typeof existingAttendanceCode === "number" &&
@@ -285,6 +315,7 @@ const CheckInPage: React.FC = () => {
                         appointment={appointment}
                         onBack={handleRestart}
                         onConfirm={handleFinalize}
+                        onPreparePatient={async () => Boolean(await preparePatient())}
                         onAddressChange={(address) => {
                           setPatient((current) =>
                             current ? { ...current, address } : current,
@@ -331,6 +362,13 @@ const CheckInPage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {duplicatePatients.length > 0 && (
+        <DuplicatePatientDialog
+          patients={duplicatePatients}
+          onSelect={selectDuplicatePatient}
+          onCancel={() => setDuplicatePatients([])}
+        />
+      )}
     </div>
   );
 };

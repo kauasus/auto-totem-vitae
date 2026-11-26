@@ -13,6 +13,8 @@ import {
   normalizeCpf,
 } from "../../validation";
 
+type PatientSource = Omit<AppointmentSearchResponseDto, "Sala">;
+
 const asString = (value: string | number | boolean | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
 
@@ -21,7 +23,7 @@ const pickDisplayCpf = (cpfInput: string) => {
   return cpf ? formatCpf(cpf) : cpfInput;
 };
 
-const pickCpf = (response: AppointmentSearchResponseDto, cpfInput: string) => {
+const pickCpf = (response: PatientSource, cpfInput: string) => {
   const responseCpf = String(
     response.Paciente?.codCpf ?? response.codCpf ?? "",
   );
@@ -29,20 +31,20 @@ const pickCpf = (response: AppointmentSearchResponseDto, cpfInput: string) => {
   return isValidCpf(responseCpf) ? responseCpf : cpfInput;
 };
 
-const pickPatientName = (response: AppointmentSearchResponseDto) =>
+const pickPatientName = (response: PatientSource) =>
   response.Paciente?.nomPaciente ||
   response.nomPaciente ||
   response.nomSolicitante ||
   response.nomUsuario ||
   "";
 
-const pickBirthDate = (response: AppointmentSearchResponseDto) =>
+const pickBirthDate = (response: PatientSource) =>
   response.Paciente?.datNascimento ||
   response.datNascimento ||
   response.datNasc ||
   "";
 
-const pickPatientSex = (response: AppointmentSearchResponseDto) => {
+const pickPatientSex = (response: PatientSource) => {
   const value = (
     response.Paciente?.dscSexo ||
     response.Paciente?.indSexo ||
@@ -55,7 +57,7 @@ const pickPatientSex = (response: AppointmentSearchResponseDto) => {
   return value;
 };
 
-const pickAddress = (response: AppointmentSearchResponseDto) => {
+const pickAddress = (response: PatientSource) => {
   const patient = response.Paciente;
   const upper = (value: Parameters<typeof asString>[0]) => asString(value).toUpperCase();
 
@@ -111,8 +113,8 @@ const pickCodTipoGuia = (response: AppointmentSearchResponseDto) => {
   return undefined;
 };
 
-const mapPatient = (
-  response: AppointmentSearchResponseDto,
+export const mapPatient = (
+  response: PatientSource,
   cpfInput: string,
 ): PatientData => ({
   codPaciente: response.codPaciente ?? response.Paciente?.codPaciente,
