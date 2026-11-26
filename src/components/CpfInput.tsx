@@ -12,12 +12,15 @@ interface CpfInputProps {
   ) => Promise<{ found: boolean; patient?: any; message?: string }>;
 }
 
-const formatCPF = (v: string) => {
-  const d = v.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 3) return d;
-  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
-  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
-  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
+const maskCpf = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  const groups = [
+    digits.slice(0, 3),
+    "*".repeat(digits.slice(3, 6).length),
+    "*".repeat(digits.slice(6, 9).length),
+  ];
+  const suffix = digits.slice(9);
+  return groups.filter(Boolean).join(".") + (suffix ? `-${suffix}` : "");
 };
 
 const onlyNumbers = (s: string) => s.replace(/\D/g, "");
@@ -117,7 +120,7 @@ const CpfInput: React.FC<CpfInputProps> = ({ cpf, setCpf, onSubmit }) => {
           aria-live="polite"
           aria-atomic="true"
         >
-          {formatCPF(local)}
+          {maskCpf(local)}
         </span>
 
         <p className="text-sm text-gray-400 mb-5">
