@@ -203,7 +203,7 @@ const CheckInPage: React.FC = () => {
   const subtitleMap: Record<Step, string> = {
     cpf: "Identifique-se para iniciar o atendimento",
     payment: "Dados do paciente, consulta e pagamento",
-    success: "Pagamento confirmado",
+    success: "Recepção confirmada",
   };
 
   return (

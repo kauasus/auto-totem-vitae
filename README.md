@@ -74,6 +74,21 @@ export default defineConfig([
 
 ## Integração com a maquininha
 
+Configure a integração no `.env`:
+
+```dotenv
+VITE_PAYMENT_INTEGRATION_ENABLED=false
+```
+
+Com `false` ou sem a variável, o totem mantém o fluxo anterior. A forma de
+pagamento selecionada é registrada na recepção, sem cobrança pelo totem e sem
+impressão de comprovante de pagamento pela integração. Use `true` para ativar
+a integração, inclusive o PIX processado pelo serviço da maquininha. Após
+alterar a variável, reinicie o servidor de desenvolvimento ou gere e publique
+um novo build de produção (`npm run build`).
+
+Com a integração ativada, o fluxo funciona da seguinte forma.
+
 O botão **Concluir Pagamento** envia `POST /payment` ao PlimpagKioskService,
 com valor em centavos, débito = 0, crédito = 1, PIX = 2 e uma parcela.
 O acompanhamento consulta `GET /status` a cada 800 ms, sem consultas sobrepostas.

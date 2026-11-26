@@ -1,4 +1,6 @@
 export const env = {
+  paymentIntegrationEnabled:
+    import.meta.env.VITE_PAYMENT_INTEGRATION_ENABLED?.trim().toLowerCase() === "true",
   paymentServiceUrl:
     import.meta.env.VITE_PAYMENT_SERVICE_URL?.trim() || "https://127.0.0.1",
   paymentActivation: {

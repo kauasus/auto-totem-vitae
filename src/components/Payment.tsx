@@ -3,6 +3,7 @@ import { AlertCircle, Keyboard } from "lucide-react";
 import AddressForm from "./AddressForm";
 import PaymentFlow from "./PaymentFlow";
 import { buildPaymentPayload, printPaymentReceipt } from "../infra/payment/payment-service";
+import { env } from "../main/config/env";
 import FieldKeyboardModal from "./FieldKeyboardModal";
 import type { AddressData, Appointment, PatientData } from "../types";
 import type { PaymentMethod } from "../domain/entities/check-in";
@@ -182,22 +183,14 @@ const Payment: React.FC<PaymentProps> = ({
       ? []
       : ["endereço completo"];
   const canCompleteReception = requiredMissingData.length === 0;
+  const usesPaymentIntegration = env.paymentIntegrationEnabled && !appointment.indRetorno;
 
   const handleConfirm = async (approved = paymentApproved) => {
-    if (!method || submitting.current) return;
+    if (submitting.current || (!appointment.indRetorno && method === "Retorno")) return;
     if (!canCompleteReception) {
       setError(
         `Preencha os dados obrigatórios: ${requiredMissingData.join(", ")}.`,
       );
-      return;
-    }
-    if (!appointment.indRetorno && !approved) {
-      try {
-        setError(null);
-        setPaymentPayload(buildPaymentPayload(method, appointment.valor ?? appointment.valProcedimento));
-      } catch (cause) {
-        setError(cause instanceof Error ? cause.message : "Valor inválido.");
-      }
       return;
     }
     submitting.current = true;
@@ -205,7 +198,13 @@ const Payment: React.FC<PaymentProps> = ({
     setError(null);
 
     try {
-      if (!appointment.indRetorno && !paymentReceiptPrinted.current) {
+      if (usesPaymentIntegration && !approved) {
+        const payload = buildPaymentPayload(method, appointment.valor ?? appointment.valProcedimento);
+        setPaymentPayload(payload);
+        return;
+      }
+
+      if (usesPaymentIntegration && !paymentReceiptPrinted.current) {
         if (!paymentReceipt.current) {
           throw new Error("Pagamento aprovado, mas o serviço não forneceu o comprovante. Solicite ajuda à recepção. Não repita a cobrança.");
         }
@@ -413,10 +412,6 @@ const Payment: React.FC<PaymentProps> = ({
                 );
               })}
             </div>
-            {/* <p className="text-base text-gray-600">
-            Em frente do agendamento de pagamento, verificar a
-            maquininha/cartão.
-          </p> */}
           </section>
         )}
         {error && (
@@ -453,9 +448,9 @@ const Payment: React.FC<PaymentProps> = ({
         >
           {isSubmitting
             ? "Confirmando..."
-            : appointment.indRetorno
+            : !usesPaymentIntegration || paymentApproved
               ? "Concluir Recepção"
-              : paymentApproved ? "Concluir Recepção" : "Concluir Pagamento"}
+              : "Concluir Pagamento"}
         </button>
       </footer>
 

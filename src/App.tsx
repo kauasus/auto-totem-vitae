@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import LoginPage from "./presentation/pages/LoginPage";
 import { hasSession, SESSION_EXPIRED_EVENT } from "./infra/auth/session";
 import { activatePaymentService } from "./infra/payment/payment-service";
+import { env } from "./main/config/env";
 
 const App = () => {
   const [authenticated, setAuthenticated] = useState(hasSession);
@@ -15,7 +16,9 @@ const App = () => {
     });
   };
 
-  useEffect(() => { activate(); }, []);
+  useEffect(() => {
+    if (env.paymentIntegrationEnabled) activate();
+  }, []);
 
   useEffect(() => {
     const onExpired = () => {

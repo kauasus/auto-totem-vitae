@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 import type { PatientData } from "../types";
 import { fireConfetti } from "../utils/confetti";
+import { env } from "../main/config/env";
 
 interface SuccessProps {
   patient?: PatientData | null;
@@ -24,7 +25,9 @@ const Success: React.FC<SuccessProps> = ({
       <div className="flex flex-col items-center gap-4">
         <CheckCircle className="w-24 h-24 text-green-500" />
         <h2 className="text-2xl font-bold">
-          {indRetorno ? "Retorno confirmado!" : "Pagamento confirmado!"}
+          {indRetorno
+            ? "Retorno confirmado!"
+            : env.paymentIntegrationEnabled ? "Pagamento confirmado!" : "Recepção confirmada!"}
         </h2>
         <p className="text-lg">
           Obrigado,{" "}

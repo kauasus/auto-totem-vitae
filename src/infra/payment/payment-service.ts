@@ -59,6 +59,9 @@ export function activatePaymentService(): Promise<void> {
 }
 
 export async function paymentRequest(path: string, body?: object): Promise<PaymentStatus> {
+  if (!env.paymentIntegrationEnabled) {
+    throw new Error("A integração com a maquininha está desativada.");
+  }
   let response: Response;
   try {
     response = await fetch(`${env.paymentServiceUrl.replace(/\/+$/, "")}${path}`, {
