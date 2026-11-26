@@ -11,7 +11,7 @@ interface SummaryProps {
 
 const priceLabel = (v?: number) =>
   typeof v === "number"
-    ? `R$ ${v.toFixed(2).replace(".", ",")}`
+    ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
     : "Não informado";
 
 const Summary: React.FC<SummaryProps> = ({

@@ -63,7 +63,7 @@ const isAddressComplete = (address?: AddressData) =>
 
 const priceLabel = (v?: number) =>
   typeof v === "number"
-    ? `R$ ${v.toFixed(2).replace(".", ",")}`
+    ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
     : "Não informado";
 
 const addressLabel = (patient: PatientData) => {
