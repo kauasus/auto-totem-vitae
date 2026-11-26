@@ -57,32 +57,27 @@ const pickPatientSex = (response: AppointmentSearchResponseDto) => {
 
 const pickAddress = (response: AppointmentSearchResponseDto) => {
   const patient = response.Paciente;
+  const upper = (value: Parameters<typeof asString>[0]) => asString(value).toUpperCase();
 
   return {
     cep: asString(patient?.codEndrcmntPstl ?? response.codEndrcmntPstl),
-    logradouro: [
-      patient?.abrLogradouro ?? response.abrLogradouro,
-      patient?.nomLogradouro ?? response.nomLogradouro,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim(),
-    numero: asString(patient?.numPredio ?? response.numPredio),
-    complemento: asString(
+    logradouro: upper(patient?.nomLogradouro ?? response.nomLogradouro).trim(),
+    numero: upper(patient?.numPredio ?? response.numPredio),
+    complemento: upper(
       patient?.dscCmplmntEndrc ?? response.dscCmplmntEndrc,
     ),
-    bairro: asString(patient?.nomBairro ?? response.nomBairro),
-    cidade: asString(
+    bairro: upper(patient?.nomBairro ?? response.nomBairro),
+    cidade: upper(
       patient?.Municipio?.dscMunicipio ?? response.dscMunicipio,
     ),
-    municipio: asString(
+    municipio: upper(
       patient?.Municipio?.dscMunicipio ?? response.dscMunicipio,
     ),
-    uf: asString(
+    uf: upper(
       patient?.sigUnidadeFederacao ?? response.sigUnidadeFederacao,
     ),
     codMunicipio:
-      patient?.Municipio?.codMunicipio ?? response.codMunicipio,
+      patient?.Municipio?.codMunicipio ?? patient?.codMunicipio ?? response.codMunicipio,
   };
 };
 

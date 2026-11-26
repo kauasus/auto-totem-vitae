@@ -4,6 +4,13 @@ import type { AddressData } from '../types';
 import { formatCep, isValidCep, normalizeCep, onlyDigits } from '../utils/validation';
 import { playClick } from '../utils/sounds';
 import FieldKeyboardModal from './FieldKeyboardModal';
+import {
+  findCepMunicipality,
+  listMunicipalities,
+  municipalityState,
+  normalizeMunicipalityName,
+  type Municipality,
+} from '../data/usecases/remote-list-municipalities';
 
 interface AddressFormProps {
   value?: AddressData;
@@ -12,7 +19,7 @@ interface AddressFormProps {
   onNext: () => void;
 }
 
-type AddressField = Exclude<keyof AddressData, 'codMunicipio'>;
+type AddressField = Exclude<keyof AddressData, 'codMunicipio' | 'uf'>;
 
 const emptyAddress: AddressData = {
   cep: '',
@@ -60,16 +67,10 @@ const fieldConfig: Record<
     maxLength: 40,
   },
   cidade: {
-    label: 'Cidade',
+    label: 'Município',
     placeholder: '',
     keyboardKind: 'text',
     maxLength: 40,
-  },
-  uf: {
-    label: 'UF',
-    placeholder: '',
-    keyboardKind: 'text',
-    maxLength: 2,
   },
 };
 
@@ -79,11 +80,41 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
   const [cepStatus, setCepStatus] = useState<'idle' | 'found' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [activeField, setActiveField] = useState<AddressField | null>(null);
+  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
+  const [municipalitiesStatus, setMunicipalitiesStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [municipalitiesAttempt, setMunicipalitiesAttempt] = useState(0);
+  const [cepMunicipality, setCepMunicipality] = useState<{ ibge?: string; localidade?: string; uf?: string }>();
   const lookupTokenRef = useRef(0);
 
   useEffect(() => {
     if (value) setAddress(value);
   }, [value]);
+
+  useEffect(() => {
+    let active = true;
+    void listMunicipalities().then((items) => {
+      if (!active) return;
+      setMunicipalities(items);
+      setMunicipalitiesStatus('ready');
+    }).catch(() => {
+      if (active) setMunicipalitiesStatus('error');
+    });
+    return () => { active = false; };
+  }, [municipalitiesAttempt]);
+
+  useEffect(() => () => { lookupTokenRef.current += 1; }, []);
+
+  const municipality = cepMunicipality
+    ? findCepMunicipality(municipalities, cepMunicipality)
+    : municipalities.find((item) => item.codMunicipio === address.codMunicipio)
+      ?? findCepMunicipality(municipalities, { localidade: address.cidade, uf: address.uf });
+
+  const withMunicipality = (base: AddressData, item: Municipality): AddressData => ({
+    ...base,
+    codMunicipio: item.codMunicipio,
+    cidade: item.dscMunicipio.toUpperCase(),
+    uf: municipalityState(item),
+  });
 
   const pushChange = (next: AddressData) => {
     setAddress(next);
@@ -108,7 +139,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
 
       if (token !== lookupTokenRef.current) return;
 
-      if (data?.erro) {
+      if (!response.ok || data?.erro) {
         setCepStatus('error');
         setError('CEP não encontrado. Confira ou preencha o endereço manualmente.');
         return;
@@ -117,16 +148,18 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
       const nextAddress: AddressData = {
         ...baseAddress,
         cep: formatCep(cepDigits),
-        logradouro: data.logradouro || baseAddress.logradouro,
-        bairro: data.bairro || baseAddress.bairro,
-        cidade: data.localidade || baseAddress.cidade,
-        uf: data.uf || baseAddress.uf,
-        codMunicipio: Number(data.ibge) || baseAddress.codMunicipio,
+        logradouro: (data.logradouro || baseAddress.logradouro).toUpperCase(),
+        bairro: (data.bairro || baseAddress.bairro).toUpperCase(),
+        cidade: '',
+        uf: '',
+        codMunicipio: undefined,
         numero: baseAddress.numero,
         complemento: baseAddress.complemento ?? '',
       };
 
-      pushChange(nextAddress);
+      const match = findCepMunicipality(municipalities, data);
+      pushChange(match ? withMunicipality(nextAddress, match) : nextAddress);
+      setCepMunicipality(match ? undefined : data);
       setCepStatus('found');
       setError(null);
     } catch {
@@ -145,14 +178,11 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
     address.logradouro.trim().length > 0 &&
     address.numero.trim().length > 0 &&
     address.bairro.trim().length > 0 &&
-    address.cidade.trim().length > 0 &&
-    address.uf.trim().length === 2 &&
-    typeof address.codMunicipio === 'number' &&
-    Number.isFinite(address.codMunicipio) &&
-    address.codMunicipio > 0 &&
+    Boolean(municipality) &&
     !loadingCep;
 
   const openField = (field: AddressField) => {
+    if (loadingCep) return;
     setActiveField(field);
     setError(null);
     playClick(0.08);
@@ -166,11 +196,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
 
     if (field === 'cep') {
       const digits = normalizeCep(valueToSave);
+      const changed = digits !== normalizeCep(address.cep);
       const baseAddress = {
         ...address,
         cep: formatCep(digits),
+        ...(changed ? { codMunicipio: undefined, cidade: '', uf: '' } : {}),
       };
 
+      if (changed) setCepMunicipality(undefined);
       pushChange(baseAddress);
       setCepStatus('idle');
       closeField();
@@ -192,13 +225,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
       return;
     }
 
-    if (field === 'uf') {
-      pushChange({ ...address, uf: valueToSave.toUpperCase().slice(0, 2) });
-      setError(null);
-      closeField();
-      return;
-    }
-
     const cleaned = valueToSave.replace(/\s+/g, ' ').toUpperCase();
     pushChange({ ...address, [field]: cleaned } as AddressData);
     setError(null);
@@ -211,7 +237,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
       ? normalizeCep(address.cep)
       : activeField === 'numero'
         ? onlyDigits(address.numero)
-        : activeField
+        : activeField && activeField !== 'cidade'
           ? String(address[activeField] ?? '')
           : '';
 
@@ -283,24 +309,21 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
 
             <FieldButton
               label={fieldConfig.cidade.label}
-              value={address.cidade}
-              placeholder={fieldConfig.cidade.placeholder}
+              value={municipality?.dscMunicipio.toUpperCase() ?? ''}
+              placeholder="Selecionar município"
               onClick={() => openField('cidade')}
               className="md:col-span-4"
             />
 
-            <FieldButton
-              label={fieldConfig.uf.label}
-              value={address.uf}
-              placeholder={fieldConfig.uf.placeholder}
-              onClick={() => openField('uf')}
-              className="md:col-span-2"
-            />
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 md:col-span-2">
+              <div className="text-[11px] font-black uppercase tracking-widest text-gray-500">UF</div>
+              <div className="mt-2 text-lg font-semibold text-gray-800">{municipality ? municipalityState(municipality) : '—'}</div>
+            </div>
           </div>
 
           <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
             <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span>O CEP é validado automaticamente e os demais campos podem ser ajustados manualmente.</span>
+            <span>O CEP ajuda a localizar o endereço. A UF é preenchida pelo município selecionado.</span>
           </div>
 
           {error && <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
@@ -323,8 +346,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
           )}
           <button
             onClick={() => {
-              if (!canProceed) return;
+              if (!canProceed || !municipality) return;
               playClick(0.08);
+              pushChange(withMunicipality(address, municipality));
               onNext();
             }}
             disabled={!canProceed}
@@ -347,8 +371,8 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
         subtitle={
           activeField === 'cep'
             ? 'Digite o CEP para buscar o endereço automaticamente.'
-            : activeField === 'uf'
-              ? 'Somente duas letras.'
+            : activeField === 'cidade'
+              ? 'Escolha um município cadastrado no WebClin.'
               : 'Use o teclado para preencher o campo.'
         }
         value={activeValue}
@@ -357,7 +381,43 @@ const AddressForm: React.FC<AddressFormProps> = ({ value, onChange, onBack, onNe
         maxLength={activeField ? activeConfig?.maxLength : undefined}
         previewFormatter={activeField === 'cep' ? formatCep : undefined}
         onClose={closeField}
-        onConfirm={(nextValue) => {
+        renderResults={activeField === 'cidade' ? (query) => {
+          if (municipalitiesStatus === 'loading') return <p role="status">Carregando municípios…</p>;
+          if (municipalitiesStatus === 'error') return (
+            <div role="alert" className="flex items-center justify-between gap-4">
+              <p>Não foi possível carregar os municípios.</p>
+              <button type="button" className="rounded-xl bg-gray-100 px-4 py-3 font-bold" onClick={() => {
+                setMunicipalitiesStatus('loading');
+                setMunicipalitiesAttempt((attempt) => attempt + 1);
+              }}>Tentar novamente</button>
+            </div>
+          );
+
+          const term = normalizeMunicipalityName(query);
+          const matches = municipalities.filter((item) =>
+            normalizeMunicipalityName(`${item.dscMunicipio} ${item.dscDistrito ?? ''} ${municipalityState(item)}`).includes(term),
+          );
+          return (
+            <>
+              {matches.length === 0 && <p role="status">Nenhum município encontrado.</p>}
+              <ul className="max-h-48 space-y-2 overflow-y-auto">
+                {matches.slice(0, 50).map((item) => (
+                  <li key={item.codMunicipio}>
+                    <button type="button" className="w-full rounded-xl border border-gray-200 px-4 py-3 text-left hover:border-[#a31515]" onClick={() => {
+                      setCepMunicipality(undefined);
+                      pushChange(withMunicipality(address, item));
+                      closeField();
+                    }}>
+                      {item.dscMunicipio.toUpperCase()}{item.dscDistrito && item.dscDistrito !== item.dscMunicipio ? ` · ${item.dscDistrito.toUpperCase()}` : ''} · {municipalityState(item)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {matches.length > 50 && <p className="text-sm text-gray-600">Digite mais letras para refinar a busca.</p>}
+            </>
+          );
+        } : undefined}
+        onConfirm={activeField === 'cidade' ? undefined : (nextValue) => {
           if (!activeField) return;
           void commitField(activeField, nextValue);
         }}

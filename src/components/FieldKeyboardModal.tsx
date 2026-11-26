@@ -17,7 +17,8 @@ interface FieldKeyboardModalProps {
   maxLength?: number;
   previewFormatter?: (value: string) => string;
   onClose: () => void;
-  onConfirm: (value: string) => void;
+  onConfirm?: (value: string) => void;
+  renderResults?: (value: string) => React.ReactNode;
 }
 
 const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
@@ -31,6 +32,7 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
   previewFormatter,
   onClose,
   onConfirm,
+  renderResults,
 }) => {
   const [draft, setDraft] = useState(value);
 
@@ -51,7 +53,7 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
 
   const handleConfirm = () => {
     playClick(0.08);
-    onConfirm(draft);
+    onConfirm?.(draft);
   };
 
   return (
@@ -64,7 +66,7 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="w-full max-w-4xl overflow-hidden rounded-4xl border border-white/40 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)]"
+            className="max-h-full w-full max-w-4xl overflow-y-auto rounded-4xl border border-white/40 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)]"
             initial={{ y: 30, scale: 0.96, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 20, scale: 0.98, opacity: 0 }}
@@ -105,7 +107,7 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
 
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Keyboard className="h-4 w-4" />
-                <span>Toque nas teclas para preencher o campo e confirme no fim.</span>
+                <span>{renderResults ? "Digite para filtrar a lista." : "Toque nas teclas para preencher o campo e confirme no fim."}</span>
               </div>
 
               {keyboardKind === 'numeric' ? (
@@ -113,6 +115,8 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
               ) : (
                 <TextKeyboard onKeyPress={handleKeyPress} />
               )}
+
+              {renderResults?.(draft)}
 
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <button
@@ -123,13 +127,13 @@ const FieldKeyboardModal: React.FC<FieldKeyboardModalProps> = ({
                   Cancelar
                 </button>
 
-                <button
+                {onConfirm && <button
                   type="button"
                   onClick={handleConfirm}
                   className="rounded-2xl bg-[#b91c1c] px-8 py-4 text-lg font-black uppercase tracking-wide text-white shadow-lg transition hover:bg-[#991414] active:scale-95"
                 >
                   Confirmar
-                </button>
+                </button>}
               </div>
             </div>
           </motion.div>
