@@ -149,6 +149,11 @@ export default function PaymentFlow({ payload, onApproved, onClose }: Props) {
           </div>
         )}
         {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
+        {!serviceBusy && terminal && outcome !== "APPROVED" && status.message && (
+          <p role="alert" className="rounded-xl bg-amber-50 p-4 text-amber-900">
+            {status.message}
+          </p>
+        )}
         {outcome?.startsWith("APPROVED_WITH_") && (
           <p role="alert" className="text-red-700">O serviço informou aprovação com erro. Não repita o pagamento. Solicite ajuda à recepção para verificar a transação e concluir o atendimento.</p>
         )}
